@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:fmb_connect/menu.dart';
 import 'package:intl/intl.dart';
+
+
 
 showLoaderDialog(BuildContext context, String? text) {
   AlertDialog alert = AlertDialog(
@@ -78,24 +78,21 @@ String datesSelected(DateTime? startDate, DateTime? endDate) {
 bool dateInRange(DateTime date, DateTime startDate, DateTime? endDate) =>
     date == startDate || endDate != null && !date.isAfter(endDate) && !date.isBefore(startDate);
 
-List<DateTime> skippedDatesList(String its) {
-  Set<DateTime> dates = {};
-  for (var skip in skipsList.where((skip) => skip["its"] == its)) {
-    dates.addAll(datesInBetween(skip['startDate'], skip['endDate']));
-  }
-  return dates.toList();
-}
+// List<DateTime> skippedDatesList(String its, List<DateTime> skippedDates ) {
+//   Set<DateTime> dates = {};
+//   for (var skip in skipsList.where((skip) => skip["its"] == its)) {
+//     dates.addAll(datesInBetween(skip['startDate'], skip['endDate']));
+//   }
+//   return dates.toList();
+// }
 
-bool dateSkipped(DateTime date, String its) {
-  return skipsList
-      .where((skip) => skip["its"] == its)
-      .any((skip) => dateInRange(date, skip['startDate'], skip['endDate']));
-}
+// bool dateSkipped(DateTime date, String its, List<Map> skipsList) {
+//   return skipsList
+//       .where((skip) => skip["its"] == its)
+//       .any((skip) => dateInRange(date, skip['startDate'], skip['endDate']));
+// }
 
-bool filterMenu(Menu menu, DateTime startDate, DateTime endDate) {
-  DateTime menuDate = DateTime(menu.year, menu.month, menu.day);
-  return dateInRange(menuDate, startDate, endDate);
-}
+
 
 List<DateTime> datesInBetween(DateTime startDate, DateTime endDate) {
   List<DateTime> days = [];
@@ -105,8 +102,10 @@ List<DateTime> datesInBetween(DateTime startDate, DateTime endDate) {
   return days;
 }
 
-Future<Map?> fetch(String url, [Map? data]) async {
-  Response responseFromAPI = await Dio().get(url, data: data);
+Future<Map?> fetch(String url, [Map? data, int timeout = 2]) async {
+  Response responseFromAPI = await Dio().get(url,
+      data: data,
+      options: Options(sendTimeout: Duration(seconds: timeout), receiveTimeout: Duration(seconds: timeout)));
   try {
     if (responseFromAPI.statusCode == 200) {
       return responseFromAPI.data as Map;
@@ -117,3 +116,20 @@ Future<Map?> fetch(String url, [Map? data]) async {
     return null;
   }
 }
+
+
+Future<Map?> post(String url, [Map? data, int timeout = 2]) async {
+  Response responseFromAPI = await Dio().post(url,
+      data: data,
+      options: Options(sendTimeout: Duration(seconds: timeout), receiveTimeout: Duration(seconds: timeout),  ));
+  try {
+    if (responseFromAPI.statusCode == 200) {
+      return responseFromAPI.data as Map;
+    } else {
+      return null;
+    }
+  } catch (errorMsg) {
+    return null;
+  }
+}
+

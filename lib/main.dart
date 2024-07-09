@@ -4,6 +4,9 @@ import 'package:fmb_connect/auth.dart';
 import 'package:fmb_connect/login.dart';
 import 'package:fmb_connect/theme.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/intl.dart';
+
+
 void main() async {
   await dotenv.load();
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +24,9 @@ class MyApp extends StatelessWidget {
     routes: {
       '/': ( context) => App(ModalRoute.of(context)!.settings.arguments as String? ?? its),
       'login': (context) => const Login(),
-    });
+    },
+    );
+
   }
 }
 

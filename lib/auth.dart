@@ -56,7 +56,7 @@ class Auth {
     if (its != null && password != null) {
       bool isAuth = await authenticate(its, password);
       if (!isAuth) clearLoginCred();
-      return its;
+      return isAuth? its:'';
     }
     return '';
   }
