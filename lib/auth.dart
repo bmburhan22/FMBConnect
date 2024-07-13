@@ -6,24 +6,21 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class Auth {
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
-  static login(BuildContext context, String? its, String? password) async {
-    if (its == null || password == null || its.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).removeCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enter ITS and password')));
+  static login(BuildContext context, String? its, String? otp) async {
+    if (its == null || otp == null || its.isEmpty || otp.isEmpty) {
+      showSnackBar(context, 'Enter ITS and OTP');
       return;
     }
     showLoaderDialog(context, 'Logging in...');
-    bool isAuth = await authenticate(its, password);
+    bool isAuth = await authenticate(its, otp);
     Navigator.pop(context);
 
     if (isAuth) {
       // Navigator.pop(context);
       Navigator.of(context).pushReplacementNamed('/', arguments: its);
-      saveLoginCred(its, password);
+      saveLoginCred(its, otp);
     } else {
-      ScaffoldMessenger.of(context).removeCurrentSnackBar();
-
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid ITS or password')));
+      showSnackBar(context, 'Invalid OTP');
     }
   }
 
@@ -35,28 +32,28 @@ class Auth {
 
   static saveLoginCred(String its, String password) async {
     await _storage.write(key: 'its', value: its);
-    await _storage.write(key: 'password', value: password);
+    await _storage.write(key: 'otp', value: password);
   }
 
   static clearLoginCred() async {
     await _storage.delete(key: 'its');
-    await _storage.delete(key: 'password');
+    await _storage.delete(key: 'otp');
   }
 
-  static Future<bool> authenticate(String its, String password) async {
-    String loginURL = '${dotenv.env['API_URL']!}/login';
-    Map body = {'its': its, 'password': password};
+  static Future<bool> authenticate(String its, String otp) async {
+    String loginURL = '${dotenv.env['API_URL']!}/verify_otp';
+    Map body = {'its': its, 'otp': otp};
     Map? data = await fetch(loginURL, body);
     return data?['auth'] ?? false;
   }
 
   static Future<String> authState() async {
     String? its = await _storage.read(key: 'its');
-    String? password = await _storage.read(key: 'password');
-    if (its != null && password != null) {
-      bool isAuth = await authenticate(its, password);
+    String? otp = await _storage.read(key: 'otp');
+    if (its != null && otp != null) {
+      bool isAuth = await authenticate(its, otp);
       if (!isAuth) clearLoginCred();
-      return isAuth? its:'';
+      return isAuth ? its : '';
     }
     return '';
   }

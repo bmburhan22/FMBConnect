@@ -93,6 +93,11 @@ bool dateInRange(DateTime date, DateTime startDate, DateTime? endDate) =>
 // }
 
 
+  showSnackBar(context, String text) {
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  }
 
 List<DateTime> datesInBetween(DateTime startDate, DateTime endDate) {
   List<DateTime> days = [];
@@ -102,7 +107,7 @@ List<DateTime> datesInBetween(DateTime startDate, DateTime endDate) {
   return days;
 }
 
-Future<Map?> fetch(String url, [Map? data, int timeout = 2]) async {
+Future<Map?> fetch(String url, [Map? data, int timeout = 5]) async {
   Response responseFromAPI = await Dio().get(url,
       data: data,
       options: Options(sendTimeout: Duration(seconds: timeout), receiveTimeout: Duration(seconds: timeout)));
@@ -118,7 +123,7 @@ Future<Map?> fetch(String url, [Map? data, int timeout = 2]) async {
 }
 
 
-Future<Map?> post(String url, [Map? data, int timeout = 2]) async {
+Future<Map?> post(String url, [Map? data, int timeout = 5]) async {
   Response responseFromAPI = await Dio().post(url,
       data: data,
       options: Options(sendTimeout: Duration(seconds: timeout), receiveTimeout: Duration(seconds: timeout),  ));

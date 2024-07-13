@@ -10,7 +10,10 @@ import 'package:intl/intl.dart';
 void main() async {
   await dotenv.load();
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp(await Auth.authState()));
+  runApp(MyApp(
+  
+    await Auth.authState()
+    ));
 }
 
 class MyApp extends StatelessWidget {

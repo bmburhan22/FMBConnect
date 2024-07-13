@@ -11,7 +11,7 @@ import 'package:intl/intl.dart';
 
 extension DateTimeExtension on DateTime {
   String get toISODate => DateFormat('yyyy-MM-dd').format(this);
-  DateTime get firstDayOfMonth => add(const Duration(days: 1));
+  // DateTime get firstDayOfMonth => add(const Duration(days: 1));
   DateTime get lastDayOfMonth => month < 12 ? DateTime(year, month + 1, 0) : DateTime(year + 1, 1, 0);
 }
 
@@ -25,17 +25,37 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   DateTime? startDate = today(), endDate = today();
   late DateTime monthStart, monthEnd;
+  Menu? menuToday;
   List<Menu> menuList = [], menusFiltered = [];
   List<DateTime> skippedDates = [];
+
+  bool isClickable = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    fetchSkips();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   Future<void> fetchMenu() async {
     // if (startDate == null || endDate == null) return;
-    Map? res = await fetch(
-        '${dotenv.env['API_URL']}/menu', {'startDate': monthStart.toISODate, 'endDate': monthEnd.toISODate});
+    Map? res = await fetch('${dotenv.env['API_URL']}/menu', {
+      'its': widget.its,
+      'startDate': monthStart.toISODate,
+      'endDate': monthEnd.toISODate,
+      'today': today().toISODate
+    });
     if (res == null) return;
+    List<String> todayItems = List<String>.from(res['menuToday']?['items'] ?? []);
     setState(() {
-      res['menus'].forEach((m) {
-        if (!menuList.any((i) => i.date == m['date'])) menuList.add(Menu(m['date'], List<String>.from(m['items'])));
-      });
+      menuToday = todayItems.isEmpty ? null : Menu(today().toISODate, todayItems);
+      // res['menus'].forEach((m) {if (!menuList.any((i) => i.date == m['date'])) menuList.add(Menu(m['date'], List<String>.from(m['items'])));
+      menuList = List<Menu>.from(res['menus'].map((m) => Menu(m['date'], List<String>.from(m['items']))));
     });
   }
 
@@ -84,13 +104,6 @@ class _AppState extends State<App> {
   }
 
   @override
-  void initState() {
-    // TODO: implement initState
-
-    fetchSkips();
-  }
-
-  @override
   Widget build(BuildContext context) {
     menusFiltered = menuList.where((menu) => dateInRange(menu.dateTime, startDate!, endDate ?? startDate!)).toList();
     return Scaffold(
@@ -132,8 +145,7 @@ class _AppState extends State<App> {
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: MenuCard(menuList.where((menu) => menu.date == today().toISODate).firstOrNull,
-                          skippedDates.contains(today())),
+                      child: MenuCard(menuToday, skippedDates.contains(today())),
                     ),
                     const Divider(
                       thickness: 2,
