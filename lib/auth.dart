@@ -41,9 +41,8 @@ class Auth {
   }
 
   static Future<bool> authenticate(String its, String otp) async {
-    String loginURL = '${dotenv.env['API_URL']!}/verify_otp';
     Map body = {'its': its, 'otp': otp};
-    Map? data = await fetch(loginURL, body);
+    Map? data = await fetch('/verify_otp', body);
     return data?['auth'] ?? false;
   }
 

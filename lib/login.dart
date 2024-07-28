@@ -79,7 +79,7 @@ class _LoginState extends State<Login> {
                             showSnackBar(context, 'ITS field is empty');
                             return;
                           }
-                          Map? res = await post('${dotenv.env['API_URL']}/send_otp', {'its': _itsController.text});
+                          Map? res = await post('/send_otp', {'its': _itsController.text});
                           showSnackBar(context, res?['message']);
                           if (res?['error']?.isNotEmpty ?? false) return;
 

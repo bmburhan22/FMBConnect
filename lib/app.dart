@@ -12,7 +12,8 @@ import 'package:intl/intl.dart';
 extension DateTimeExtension on DateTime {
   String get toISODate => DateFormat('yyyy-MM-dd').format(this);
   // DateTime get firstDayOfMonth => add(const Duration(days: 1));
-  DateTime get lastDayOfMonth => month < 12 ? DateTime(year, month + 1, 0) : DateTime(year + 1, 1, 0);
+  DateTime get lastDayOfMonth =>
+      month < 12 ? DateTime(year, month + 1, 0) : DateTime(year + 1, 1, 0);
 }
 
 class App extends StatefulWidget {
@@ -44,18 +45,21 @@ class _AppState extends State<App> {
 
   Future<void> fetchMenu() async {
     // if (startDate == null || endDate == null) return;
-    Map? res = await fetch('${dotenv.env['API_URL']}/menu', {
+    Map? res = await fetch('/menu', {
       'its': widget.its,
       'startDate': monthStart.toISODate,
       'endDate': monthEnd.toISODate,
       'today': today().toISODate
     });
     if (res == null) return;
-    List<String> todayItems = List<String>.from(res['menuToday']?['items'] ?? []);
+    List<String> todayItems =
+        List<String>.from(res['menuToday']?['items'] ?? []);
     setState(() {
-      menuToday = todayItems.isEmpty ? null : Menu(today().toISODate, todayItems);
+      menuToday =
+          todayItems.isEmpty ? null : Menu(today().toISODate, todayItems);
       // res['menus'].forEach((m) {if (!menuList.any((i) => i.date == m['date'])) menuList.add(Menu(m['date'], List<String>.from(m['items'])));
-      menuList = List<Menu>.from(res['menus'].map((m) => Menu(m['date'], List<String>.from(m['items']))));
+      menuList = List<Menu>.from(res['menus']
+          .map((m) => Menu(m['date'], List<String>.from(m['items']))));
     });
   }
 
@@ -65,10 +69,12 @@ class _AppState extends State<App> {
   }
 
   Future<void> fetchSkips() async {
-    Map? res = await fetch('${dotenv.env['API_URL']}/skip', {'its': widget.its});
+    Map? res = await fetch('/skip', {'its': widget.its});
     if (res == null) return;
     setState(() {
-      skippedDates = List<String>.from(res['dates']).map((String d) => DateFormat('yyyy-MM-dd').parse(d)).toList();
+      skippedDates = List<String>.from(res['dates'])
+          .map((String d) => DateFormat('yyyy-MM-dd').parse(d))
+          .toList();
     });
   }
 
@@ -81,7 +87,10 @@ class _AppState extends State<App> {
 
   _onSkipTiffins() async {
     if (!await showConfirmationDialog(
-        context, 'Skip tiffin for date:\n${datesSelected(startDate, endDate)} ?', 'Confirm', 'Cancel')) return;
+        context,
+        'Skip tiffin for date:\n${datesSelected(startDate, endDate)} ?',
+        'Confirm',
+        'Cancel')) return;
     setState(() {
       endDate = endDate ?? startDate;
     });
@@ -91,13 +100,18 @@ class _AppState extends State<App> {
         // || datesInBetween(startDate!, endDate!).any((date) => skippedDates.contains(date))
 
         ) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Select dates from tomorrow onwards')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Select dates from tomorrow onwards')));
     } else {
-      if ((await post('${dotenv.env['API_URL']}/skip',
-              {'its': widget.its, 'startDate': startDate!.toISODate, 'endDate': endDate!.toISODate})) !=
+      if ((await post('/skip', {
+            'its': widget.its,
+            'startDate': startDate!.toISODate,
+            'endDate': endDate!.toISODate
+          })) !=
           null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('ITS ${widget.its} skipped tiffin for date ${datesSelected(startDate, endDate)}')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(
+                'ITS ${widget.its} skipped tiffin for date ${datesSelected(startDate, endDate)}')));
         fetchSkips();
       }
     }
@@ -105,17 +119,24 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    menusFiltered = menuList.where((menu) => dateInRange(menu.dateTime, startDate!, endDate ?? startDate!)).toList();
+    menusFiltered = menuList
+        .where((menu) =>
+            dateInRange(menu.dateTime, startDate!, endDate ?? startDate!))
+        .toList();
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.teal.shade900,
           foregroundColor: Colors.white,
-          title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          title:
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             const Text('FMB Connect'),
             const SizedBox(width: 10),
             Container(
-                padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                decoration: BoxDecoration(color: Colors.teal.shade700, borderRadius: BorderRadius.circular(30)),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                decoration: BoxDecoration(
+                    color: Colors.teal.shade700,
+                    borderRadius: BorderRadius.circular(30)),
                 child: Text('ITS - ${widget.its}')),
           ]),
           actions: [
@@ -140,12 +161,16 @@ class _AppState extends State<App> {
                           alignment: Alignment.centerLeft,
                           child: Text(
                             "Today's Menu",
-                            style: Theme.of(context).textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.w700),
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall!
+                                .copyWith(fontWeight: FontWeight.w700),
                           )),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: MenuCard(menuToday, skippedDates.contains(today())),
+                      child:
+                          MenuCard(menuToday, skippedDates.contains(today())),
                     ),
                     const Divider(
                       thickness: 2,
@@ -157,17 +182,21 @@ class _AppState extends State<App> {
                             await Future.delayed(
                                 Duration.zero,
                                 () => setState(() {
-                                      monthStart = args.visibleDateRange.startDate!;
+                                      monthStart =
+                                          args.visibleDateRange.startDate!;
                                       monthEnd = args.visibleDateRange.endDate!;
                                     }));
                             await fetchMenu();
                           },
-                          backgroundColor: const Color.fromARGB(255, 211, 226, 225),
+                          backgroundColor:
+                              const Color.fromARGB(255, 211, 226, 225),
                           rangeTextStyle: const TextStyle(color: Colors.white),
-                          monthViewSettings: DateRangePickerMonthViewSettings(specialDates: skippedDates),
+                          monthViewSettings: DateRangePickerMonthViewSettings(
+                              specialDates: skippedDates),
                           monthCellStyle: DateRangePickerMonthCellStyle(
                               specialDatesDecoration: BoxDecoration(
-                            border: Border.all(color: Colors.redAccent.shade400, width: 2),
+                            border: Border.all(
+                                color: Colors.redAccent.shade400, width: 2),
                             shape: BoxShape.circle,
                           )),
                           rangeSelectionColor: Colors.teal,
@@ -178,25 +207,33 @@ class _AppState extends State<App> {
                               backgroundColor: Colors.teal.shade900),
                           selectionMode: DateRangePickerSelectionMode.range,
                           onSelectionChanged: _onSelectionChanged,
-                          initialSelectedRange: PickerDateRange(startDate, endDate),
+                          initialSelectedRange:
+                              PickerDateRange(startDate, endDate),
                         )),
                     Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                          Text('Menu for selected dates',
-                              style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.w500)),
-                          MaterialButton(
-                            onPressed: _onSkipTiffins,
-                            color: Colors.red.shade700,
-                            child: Text(
-                              'Skip Tiffins',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge!
-                                  .copyWith(color: Colors.white, fontWeight: FontWeight.w500),
-                            ),
-                          )
-                        ])),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Menu for selected dates',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium!
+                                      .copyWith(fontWeight: FontWeight.w500)),
+                              MaterialButton(
+                                onPressed: _onSkipTiffins,
+                                color: Colors.red.shade700,
+                                child: Text(
+                                  'Skip Tiffins',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge!
+                                      .copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w500),
+                                ),
+                              )
+                            ])),
                     Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: menusFiltered.isEmpty
@@ -207,7 +244,8 @@ class _AppState extends State<App> {
                                 shrinkWrap: true,
                                 itemBuilder: (_, i) {
                                   final menu = menusFiltered[i];
-                                  return MenuCard(menu, skippedDates.contains(menu.dateTime));
+                                  return MenuCard(menu,
+                                      skippedDates.contains(menu.dateTime));
                                 },
                                 separatorBuilder: (_, i) => const SizedBox(
                                   height: 10,
