@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fmb_connect/auth.dart';
 import 'package:fmb_connect/functions.dart';
-import 'package:fmb_connect/user_provider.dart';
 
 class Messages extends ConsumerStatefulWidget {
   const Messages({super.key});
@@ -13,7 +13,7 @@ class _MessagesState extends ConsumerState<Messages> {
   List<String> messages = [];
   Future<void> fetchMessages() async {
     Map? res = await fetch('/messages', {
-      'its':ref.watch(userProvider)!.its,
+      'its':ref.read(authProvider)!.its,
     });
 
     if (res == null) return;
@@ -34,7 +34,7 @@ class _MessagesState extends ConsumerState<Messages> {
         appBar: AppBar(
           backgroundColor: Colors.teal.shade900,
           foregroundColor: Colors.white,
-          title: const Text('FMB Connect'),
+          title:  Text('FMB Connect ${ref.read(authProvider)?.its }'),
         ),
         body: RefreshIndicator(
             onRefresh: fetchMessages,

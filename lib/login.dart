@@ -1,19 +1,20 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fmb_connect/auth.dart';
 import 'package:fmb_connect/functions.dart';
 import 'package:fmb_connect/main.dart';
 import 'package:pinput/pinput.dart';
 
-class Login extends StatefulWidget {
+class Login extends ConsumerStatefulWidget {
   const Login({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  ConsumerState<Login> createState() => _LoginState();
 }
 
-class _LoginState extends State<Login> {
+class _LoginState extends ConsumerState<Login> {
   final TextEditingController _itsController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
   Timer? timer;
@@ -56,7 +57,7 @@ class _LoginState extends State<Login> {
           SizedBox(
               width: 200,
               child: TextFormField(
-                enabled: seconds==0,
+                enabled: seconds == 0,
                 controller: _itsController,
                 keyboardType: TextInputType.number,
                 textAlign: TextAlign.center,
@@ -79,7 +80,8 @@ class _LoginState extends State<Login> {
                             showSnackBar(context, 'ITS field is empty');
                             return;
                           }
-                          Map? res = await post('/send_otp', {'its': _itsController.text});
+                          Map? res = await post(
+                              '/send_otp', {'its': _itsController.text});
                           showSnackBar(context, res?['message']);
                           if (res?['error']?.isNotEmpty ?? false) return;
 
@@ -94,8 +96,10 @@ class _LoginState extends State<Login> {
           Pinput(
               controller: _otpController,
               length: 6,
-              onCompleted: (password) {
-                Auth.login(context, _itsController.text, password);
+              onCompleted: (password) async {
+                await ref
+                    .watch(authProvider.notifier)
+                    .login(context, _itsController.text, password);
                 _otpController.clear();
               },
               defaultPinTheme: PinTheme(

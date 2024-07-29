@@ -5,7 +5,6 @@ import 'package:fmb_connect/functions.dart';
 import 'package:fmb_connect/main.dart';
 import 'package:fmb_connect/menu_card.dart';
 import 'package:fmb_connect/sidebar.dart';
-import 'package:fmb_connect/user_provider.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
 
@@ -23,7 +22,6 @@ class App extends ConsumerStatefulWidget {
 }
 
 class _AppState extends ConsumerState<App> {
-
   DateTime? startDate = today(), endDate = today();
   late DateTime monthStart, monthEnd;
   Menu? menuToday;
@@ -31,7 +29,7 @@ class _AppState extends ConsumerState<App> {
   List<DateTime> skippedDates = [];
 
   bool isClickable = false;
-
+  
   @override
   void initState() {
     super.initState();
@@ -46,14 +44,23 @@ class _AppState extends ConsumerState<App> {
   Future<void> fetchMenu() async {
     // if (startDate == null || endDate == null) return;
     Map? res //=await fetch('/menu', {
-        //   'its': widget.user.its,
+        //   'its': ref.watch(authProvider)!.its,
         //   'startDate': monthStart.toISODate,
         //   'endDate': monthEnd.toISODate,
         //   'today': today().toISODate
         // });
         = {
       'its': '111',
-      'menus': [],
+      'menus': [
+        {
+          'date': '2024-07-30',
+          'items': ['321eq', 'q']
+        },
+        {
+          'date': '2024-07-31',
+          'items': ['51', '316q']
+        }
+      ],
       'menuToday': {
         'date': '2024-07-29',
         'items': ['eq', '3q']
@@ -77,7 +84,7 @@ class _AppState extends ConsumerState<App> {
   }
 
   Future<void> fetchSkips() async {
-    Map? res = await fetch('/skip', {'its': ref.watch(userProvider)!.its});
+    Map? res = await fetch('/skip', {'its': ref.watch(authProvider)!.its});
     if (res == null) return;
     setState(() {
       skippedDates = List<String>.from(res['dates'])
@@ -112,14 +119,14 @@ class _AppState extends ConsumerState<App> {
           const SnackBar(content: Text('Select dates from tomorrow onwards')));
     } else {
       if ((await post('/skip', {
-            'its': ref.watch(userProvider)!.its,
+            'its':ref.watch(authProvider)!.its,
             'startDate': startDate!.toISODate,
             'endDate': endDate!.toISODate
           })) !=
           null) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(
-                'ITS ${ref.watch(userProvider)!.its} skipped tiffin for date ${datesSelected(startDate, endDate)}')));
+                'ITS ${ref.watch(authProvider)!.its} skipped tiffin for date ${datesSelected(startDate, endDate)}')));
         fetchSkips();
       }
     }
@@ -132,14 +139,14 @@ class _AppState extends ConsumerState<App> {
     });
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     if ((await delete('/skip', {
-          'its': ref.watch(userProvider)!.its,
+          'its':ref.watch(authProvider)!.its,
           'startDate': startDate!.toISODate,
           'endDate': endDate!.toISODate
         })) !=
         null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
-              'ITS ${ref.watch(userProvider)!.its} unskipped tiffin for date ${datesSelected(startDate, endDate)}')));
+              'ITS ${ref.watch(authProvider)!.its} unskipped tiffin for date ${datesSelected(startDate, endDate)}')));
       fetchSkips();
     }
   }
@@ -156,9 +163,7 @@ class _AppState extends ConsumerState<App> {
           foregroundColor: Colors.white,
           title: const Text('FMB Connect'),
         ),
-        drawer: Sidebar(
-          user: ref.watch(userProvider),
-        ),
+        drawer: const Sidebar(),
         body: RefreshIndicator(
             onRefresh: refresh,
             child: SingleChildScrollView(
@@ -172,7 +177,7 @@ class _AppState extends ConsumerState<App> {
                       child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            "Today's Menu",
+                            "Today's Menu ${ref.watch(authProvider)?.its}",
                             style: Theme.of(context)
                                 .textTheme
                                 .headlineSmall!

@@ -18,24 +18,30 @@ Dio dio = Dio(BaseOptions(
     sendTimeout: const Duration(seconds: 2),
     receiveTimeout: const Duration(seconds: 2)));
 
-showLoaderDialog(BuildContext context, String? text) {
-  AlertDialog alert = AlertDialog(
-    content: Row(
-      children: [
-        const CircularProgressIndicator(),
-        Container(
-            margin: const EdgeInsets.only(left: 7),
-            child: Text(text ?? "Please wait...")),
-      ],
-    ),
-  );
-  showDialog(
-    barrierDismissible: false,
-    context: context,
-    builder: (BuildContext context) {
-      return alert;
-    },
-  );
+class LoadingDialog {
+  final String text;
+  late AlertDialog alert;
+  LoadingDialog([this.text = "Please wait..."]) {
+   alert= AlertDialog(
+      content:
+          Container(
+            padding: const EdgeInsets.all(10), child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(),const SizedBox(width: 20,), Text(text)
+        ],
+      )),
+    );
+  }
+  show(BuildContext context) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
 }
 
 Future<bool> showConfirmationDialog(BuildContext context,
