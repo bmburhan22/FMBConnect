@@ -14,9 +14,9 @@ class User {
 
 Dio dio = Dio(BaseOptions(
     baseUrl: dotenv.env['API_URL']!,
-    connectTimeout: const Duration(seconds: 10),
-    sendTimeout: const Duration(seconds: 10),
-    receiveTimeout: const Duration(seconds: 10)));
+    connectTimeout: const Duration(seconds: 2),
+    sendTimeout: const Duration(seconds: 2),
+    receiveTimeout: const Duration(seconds: 2)));
 
 showLoaderDialog(BuildContext context, String? text) {
   AlertDialog alert = AlertDialog(
@@ -131,8 +131,8 @@ List<DateTime> datesInBetween(DateTime startDate, DateTime endDate) {
 }
 
 Future<Map?> fetch(String path, [Map? data]) async {
-  Response responseFromAPI = await dio.get(path, data: data);
   try {
+    Response responseFromAPI = await dio.get(path, data: data);
     if (responseFromAPI.statusCode == 200) {
       return responseFromAPI.data as Map;
     } else {

@@ -1,36 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fmb_connect/app.dart';
 import 'package:fmb_connect/auth.dart';
 import 'package:fmb_connect/functions.dart';
 import 'package:fmb_connect/login.dart';
+import 'package:fmb_connect/messages.dart';
 import 'package:fmb_connect/theme.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:fmb_connect/user_provider.dart';
 import 'package:intl/intl.dart';
 
 void main() async {
   await dotenv.load();
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp(User('111', "Burhanuddin Bhinderwala")
-      // await Auth.authState()
-      ));
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
-  final User? user;
-  MyApp(this.user, { super.key});
+  const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'FMBConnect',
-      theme: theme,
-      initialRoute: user ==null ? 'login' : '/',
-      routes: {
-        '/': (context) =>
-            App(ModalRoute.of(context)!.settings.arguments as User? ??user!), // user can be null?
-        'login': (context) => const Login(),
-      },
-    );
+  Widget build(BuildContext context ) {
+    return Consumer( 
+      builder: (context, WidgetRef ref, child) {
+          return MaterialApp(
+            title: 'FMBConnect',
+            theme: theme,
+            initialRoute: ref.watch(userProvider) == null ? 'login' : '/',
+            routes: {
+              '/': (context) => const App(), // user can be null?
+              '/messages': (context) => const Messages(),
+              'login': (context) => const Login(),
+            },
+          );
+        });
   }
 }
 

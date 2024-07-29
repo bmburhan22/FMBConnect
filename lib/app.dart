@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fmb_connect/auth.dart';
 import 'package:fmb_connect/functions.dart';
 import 'package:fmb_connect/main.dart';
 import 'package:fmb_connect/menu_card.dart';
 import 'package:fmb_connect/sidebar.dart';
+import 'package:fmb_connect/user_provider.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
 
@@ -14,14 +16,14 @@ extension DateTimeExtension on DateTime {
       month < 12 ? DateTime(year, month + 1, 0) : DateTime(year + 1, 1, 0);
 }
 
-class App extends StatefulWidget {
-  final User user;
-  const App(this.user, {super.key});
+class App extends ConsumerStatefulWidget {
+  const App({super.key});
   @override
-  State<App> createState() => _AppState();
+  ConsumerState<App> createState() => _AppState();
 }
 
-class _AppState extends State<App> {
+class _AppState extends ConsumerState<App> {
+
   DateTime? startDate = today(), endDate = today();
   late DateTime monthStart, monthEnd;
   Menu? menuToday;
@@ -32,7 +34,7 @@ class _AppState extends State<App> {
 
   @override
   void initState() {
-    // TODO: implement initState
+    super.initState();
     fetchSkips();
   }
 
@@ -43,16 +45,19 @@ class _AppState extends State<App> {
 
   Future<void> fetchMenu() async {
     // if (startDate == null || endDate == null) return;
-     Map? res  //=await fetch('/menu', {
-    //   'its': widget.user.its,
-    //   'startDate': monthStart.toISODate,
-    //   'endDate': monthEnd.toISODate,
-    //   'today': today().toISODate
-    // });
-    = {
+    Map? res //=await fetch('/menu', {
+        //   'its': widget.user.its,
+        //   'startDate': monthStart.toISODate,
+        //   'endDate': monthEnd.toISODate,
+        //   'today': today().toISODate
+        // });
+        = {
       'its': '111',
       'menus': [],
-      'menuToday': {'date': '2024-07-29', 'items': ['eq','3q']}
+      'menuToday': {
+        'date': '2024-07-29',
+        'items': ['eq', '3q']
+      }
     };
     if (res == null) return;
     List<String> todayItems =
@@ -72,7 +77,7 @@ class _AppState extends State<App> {
   }
 
   Future<void> fetchSkips() async {
-    Map? res = await fetch('/skip', {'its': widget.user.its});
+    Map? res = await fetch('/skip', {'its': ref.watch(userProvider)!.its});
     if (res == null) return;
     setState(() {
       skippedDates = List<String>.from(res['dates'])
@@ -107,14 +112,14 @@ class _AppState extends State<App> {
           const SnackBar(content: Text('Select dates from tomorrow onwards')));
     } else {
       if ((await post('/skip', {
-            'its': widget.user.its,
+            'its': ref.watch(userProvider)!.its,
             'startDate': startDate!.toISODate,
             'endDate': endDate!.toISODate
           })) !=
           null) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(
-                'ITS ${widget.user.its} skipped tiffin for date ${datesSelected(startDate, endDate)}')));
+                'ITS ${ref.watch(userProvider)!.its} skipped tiffin for date ${datesSelected(startDate, endDate)}')));
         fetchSkips();
       }
     }
@@ -127,14 +132,14 @@ class _AppState extends State<App> {
     });
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     if ((await delete('/skip', {
-          'its': widget.user.its,
+          'its': ref.watch(userProvider)!.its,
           'startDate': startDate!.toISODate,
           'endDate': endDate!.toISODate
         })) !=
         null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
-              'ITS ${widget.user.its} unskipped tiffin for date ${datesSelected(startDate, endDate)}')));
+              'ITS ${ref.watch(userProvider)!.its} unskipped tiffin for date ${datesSelected(startDate, endDate)}')));
       fetchSkips();
     }
   }
@@ -152,7 +157,7 @@ class _AppState extends State<App> {
           title: const Text('FMB Connect'),
         ),
         drawer: Sidebar(
-          user: widget.user,
+          user: ref.watch(userProvider),
         ),
         body: RefreshIndicator(
             onRefresh: refresh,
