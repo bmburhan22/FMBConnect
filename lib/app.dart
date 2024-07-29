@@ -1,11 +1,9 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fmb_connect/auth.dart';
 import 'package:fmb_connect/functions.dart';
 import 'package:fmb_connect/main.dart';
 import 'package:fmb_connect/menu_card.dart';
+import 'package:fmb_connect/sidebar.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
 
@@ -17,8 +15,8 @@ extension DateTimeExtension on DateTime {
 }
 
 class App extends StatefulWidget {
-  final String its;
-  const App(this.its, {super.key});
+  final User user;
+  const App(this.user, {super.key});
   @override
   State<App> createState() => _AppState();
 }
@@ -45,12 +43,17 @@ class _AppState extends State<App> {
 
   Future<void> fetchMenu() async {
     // if (startDate == null || endDate == null) return;
-    Map? res = await fetch('/menu', {
-      'its': widget.its,
-      'startDate': monthStart.toISODate,
-      'endDate': monthEnd.toISODate,
-      'today': today().toISODate
-    });
+     Map? res  //=await fetch('/menu', {
+    //   'its': widget.user.its,
+    //   'startDate': monthStart.toISODate,
+    //   'endDate': monthEnd.toISODate,
+    //   'today': today().toISODate
+    // });
+    = {
+      'its': '111',
+      'menus': [],
+      'menuToday': {'date': '2024-07-29', 'items': ['eq','3q']}
+    };
     if (res == null) return;
     List<String> todayItems =
         List<String>.from(res['menuToday']?['items'] ?? []);
@@ -58,7 +61,7 @@ class _AppState extends State<App> {
       menuToday =
           todayItems.isEmpty ? null : Menu(today().toISODate, todayItems);
       // res['menus'].forEach((m) {if (!menuList.any((i) => i.date == m['date'])) menuList.add(Menu(m['date'], List<String>.from(m['items'])));
-      menuList = List<Menu>.from(res['menus']
+      menuList = List<Menu>.from(res!['menus']
           .map((m) => Menu(m['date'], List<String>.from(m['items']))));
     });
   }
@@ -69,7 +72,7 @@ class _AppState extends State<App> {
   }
 
   Future<void> fetchSkips() async {
-    Map? res = await fetch('/skip', {'its': widget.its});
+    Map? res = await fetch('/skip', {'its': widget.user.its});
     if (res == null) return;
     setState(() {
       skippedDates = List<String>.from(res['dates'])
@@ -104,16 +107,35 @@ class _AppState extends State<App> {
           const SnackBar(content: Text('Select dates from tomorrow onwards')));
     } else {
       if ((await post('/skip', {
-            'its': widget.its,
+            'its': widget.user.its,
             'startDate': startDate!.toISODate,
             'endDate': endDate!.toISODate
           })) !=
           null) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(
-                'ITS ${widget.its} skipped tiffin for date ${datesSelected(startDate, endDate)}')));
+                'ITS ${widget.user.its} skipped tiffin for date ${datesSelected(startDate, endDate)}')));
         fetchSkips();
       }
+    }
+  }
+
+  _onUnskipTiffins() async {
+    print('rewrewqrweq');
+    setState(() {
+      endDate = endDate ?? startDate;
+    });
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    if ((await delete('/skip', {
+          'its': widget.user.its,
+          'startDate': startDate!.toISODate,
+          'endDate': endDate!.toISODate
+        })) !=
+        null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              'ITS ${widget.user.its} unskipped tiffin for date ${datesSelected(startDate, endDate)}')));
+      fetchSkips();
     }
   }
 
@@ -127,25 +149,10 @@ class _AppState extends State<App> {
         appBar: AppBar(
           backgroundColor: Colors.teal.shade900,
           foregroundColor: Colors.white,
-          title:
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            const Text('FMB Connect'),
-            const SizedBox(width: 10),
-            Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                decoration: BoxDecoration(
-                    color: Colors.teal.shade700,
-                    borderRadius: BorderRadius.circular(30)),
-                child: Text('ITS - ${widget.its}')),
-          ]),
-          actions: [
-            IconButton(
-                onPressed: () {
-                  Auth.logout(context);
-                },
-                icon: const Icon(Icons.logout))
-          ],
+          title: const Text('FMB Connect'),
+        ),
+        drawer: Sidebar(
+          user: widget.user,
         ),
         body: RefreshIndicator(
             onRefresh: refresh,
@@ -210,16 +217,29 @@ class _AppState extends State<App> {
                           initialSelectedRange:
                               PickerDateRange(startDate, endDate),
                         )),
+                    Text('Menu for selected dates',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge!
+                            .copyWith(fontWeight: FontWeight.w500)),
                     Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('Menu for selected dates',
+                              MaterialButton(
+                                onPressed: _onUnskipTiffins,
+                                color: Colors.teal.shade900,
+                                child: Text(
+                                  'Unskip Tiffins',
                                   style: Theme.of(context)
                                       .textTheme
-                                      .titleMedium!
-                                      .copyWith(fontWeight: FontWeight.w500)),
+                                      .bodyLarge!
+                                      .copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w500),
+                                ),
+                              ),
                               MaterialButton(
                                 onPressed: _onSkipTiffins,
                                 color: Colors.red.shade700,

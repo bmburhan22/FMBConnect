@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fmb_connect/functions.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Auth {
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
@@ -27,6 +26,7 @@ class Auth {
   static logout(BuildContext context) {
     clearLoginCred();
     Navigator.pop(context);
+    Navigator.pop(context);
     Navigator.of(context).pushNamed('login');
   }
 
@@ -46,14 +46,14 @@ class Auth {
     return data?['auth'] ?? false;
   }
 
-  static Future<String> authState() async {
+  static Future<User?> authState() async {
     String? its = await _storage.read(key: 'its');
     String? otp = await _storage.read(key: 'otp');
     if (its != null && otp != null) {
       bool isAuth = await authenticate(its, otp);
       if (!isAuth) clearLoginCred();
-      return isAuth ? its : '';
+      return isAuth ? User(its, '') : null;
     }
-    return '';
+    return null;
   }
 }

@@ -2,7 +2,15 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:fmb_connect/feedback_dialog.dart';
+import 'package:fmb_connect/menu_card.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_rating/flutter_rating.dart';
+
+class User {
+  final String its, name;
+  User(this.its, this.name);
+}
 
 Dio dio = Dio(BaseOptions(
     baseUrl: dotenv.env['API_URL']!,
@@ -66,6 +74,10 @@ Future<bool> showConfirmationDialog(BuildContext context,
   ));
   return showDialog(context: context, builder: (context) => alert)
       .then((_) => confirm);
+}
+
+Future<void> postFeedback(Menu menu, double rating, String review) async {
+  print('${menu.date} $rating $review');
 }
 
 DateTime tomorrow() {
@@ -133,6 +145,19 @@ Future<Map?> fetch(String path, [Map? data]) async {
 
 Future<Map?> post(String path, [Map? data]) async {
   Response responseFromAPI = await dio.post(path, data: data);
+  try {
+    if (responseFromAPI.statusCode == 200) {
+      return responseFromAPI.data as Map;
+    } else {
+      return null;
+    }
+  } catch (errorMsg) {
+    return null;
+  }
+}
+
+Future<Map?> delete(String path, [Map? data]) async {
+  Response responseFromAPI = await dio.delete(path, data: data);
   try {
     if (responseFromAPI.statusCode == 200) {
       return responseFromAPI.data as Map;
