@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 
 extension DateTimeExtension on DateTime {
   String get toISODate => DateFormat('yyyy-MM-dd').format(this);
+  String get toStringCustom => DateFormat('h:m a, d/M/y').format(this);
   // DateTime get firstDayOfMonth => add(const Duration(days: 1));
   DateTime get lastDayOfMonth =>
       month < 12 ? DateTime(year, month + 1, 0) : DateTime(year + 1, 1, 0);
@@ -26,10 +27,7 @@ class _AppState extends ConsumerState<App> {
   late DateTime monthStart, monthEnd;
   Menu? menuToday;
   List<Menu> menuList = [], menusFiltered = [];
-  List<DateTime> skippedDates = [];
-
-  bool isClickable = false;
-  
+  List<DateTime> skippedDates = [];  
   @override
   void initState() {
     super.initState();
@@ -44,7 +42,7 @@ class _AppState extends ConsumerState<App> {
   Future<void> fetchMenu() async {
     // if (startDate == null || endDate == null) return;
     Map? res //=await fetch('/menu', {
-        //   'its': ref.watch(authProvider)!.its,
+        //   'its': ref.read(authProvider)!.its,
         //   'startDate': monthStart.toISODate,
         //   'endDate': monthEnd.toISODate,
         //   'today': today().toISODate
@@ -84,7 +82,7 @@ class _AppState extends ConsumerState<App> {
   }
 
   Future<void> fetchSkips() async {
-    Map? res = await fetch('/skip', {'its': ref.watch(authProvider)!.its});
+    Map? res = await fetch('/skip', {'its': ref.read(authProvider)!.its});
     if (res == null) return;
     setState(() {
       skippedDates = List<String>.from(res['dates'])
@@ -115,38 +113,32 @@ class _AppState extends ConsumerState<App> {
         // || datesInBetween(startDate!, endDate!).any((date) => skippedDates.contains(date))
 
         ) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Select dates from tomorrow onwards')));
+showSnackBar(context, 'Select dates from tomorrow onwards');
     } else {
       if ((await post('/skip', {
-            'its':ref.watch(authProvider)!.its,
+            'its':ref.read(authProvider)!.its,
             'startDate': startDate!.toISODate,
             'endDate': endDate!.toISODate
           })) !=
           null) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(
-                'ITS ${ref.watch(authProvider)!.its} skipped tiffin for date ${datesSelected(startDate, endDate)}')));
+        showSnackBar(context,'ITS ${ref.read(authProvider)!.its} skipped tiffin for date ${datesSelected(startDate, endDate)}');
         fetchSkips();
       }
     }
   }
 
   _onUnskipTiffins() async {
-    print('rewrewqrweq');
     setState(() {
       endDate = endDate ?? startDate;
     });
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     if ((await delete('/skip', {
-          'its':ref.watch(authProvider)!.its,
+          'its':ref.read(authProvider)!.its,
           'startDate': startDate!.toISODate,
           'endDate': endDate!.toISODate
         })) !=
         null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              'ITS ${ref.watch(authProvider)!.its} unskipped tiffin for date ${datesSelected(startDate, endDate)}')));
+          showSnackBar(context,'ITS ${ref.read(authProvider)!.its} unskipped tiffin for date ${datesSelected(startDate, endDate)}');
       fetchSkips();
     }
   }
@@ -177,10 +169,10 @@ class _AppState extends ConsumerState<App> {
                       child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            "Today's Menu ${ref.watch(authProvider)?.its}",
+                            "Today's Menu",
                             style: Theme.of(context)
                                 .textTheme
-                                .headlineSmall!
+                                .titleLarge!
                                 .copyWith(fontWeight: FontWeight.w700),
                           )),
                     ),
@@ -192,8 +184,8 @@ class _AppState extends ConsumerState<App> {
                     const Divider(
                       thickness: 2,
                     ),
-                    Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: SfDateRangePicker(
                           onViewChanged: (args) async {
                             await Future.delayed(
@@ -241,6 +233,7 @@ class _AppState extends ConsumerState<App> {
                                 onPressed: _onUnskipTiffins,
                                 color: Colors.teal.shade900,
                                 child: Text(
+                                  
                                   'Unskip Tiffins',
                                   style: Theme.of(context)
                                       .textTheme

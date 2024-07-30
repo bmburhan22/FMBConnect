@@ -24,7 +24,7 @@ class MenuCard extends StatelessWidget {
         ? const NoTiffinCard()
         : GestureDetector(
             onTap: () {
-              if (menu != null)  showDialog(context: context, builder: (context) => FeedbackDialog(menu!, 2,'Good food'));
+              if (menu != null)  showDialog(context: context, builder: (context) => FeedbackDialog(menu!, null,''));
             },
             child: Container(
               decoration: BoxDecoration(

@@ -25,19 +25,19 @@ class MyApp extends StatelessWidget {
       return FutureBuilder(
           future: ref.read(authProvider.notifier).initAuth(),
           builder: (context, snapshot) {
-            // print(ref.read(authProvider));
-            // if (snapshot.connectionState == ConnectionState.waiting) {
-            //   return MaterialApp(
-            //     theme: theme,
-            //     builder: (context, child) => Scaffold(
-            //         floatingActionButton: FloatingActionButton(
-            //             backgroundColor: Colors.amber, onPressed: () {})),
-            //   );
-            // }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return MaterialApp(
+                theme: theme,
+                builder: (context, child) => Scaffold(
+                  
+                  body:  Container( padding:const  EdgeInsets.symmetric(horizontal: 20), child: const Center (child:LinearProgressIndicator()),),
+                ),
+              );
+            }
             return MaterialApp(
               title: 'FMBConnect',
               theme: theme,
-              initialRoute: ref.watch(authProvider) == null ? 'login' : '/',
+              initialRoute: ref.read(authProvider) == null ? 'login' : '/',
               routes: {
                 '/': (context) => const App(),
                 'login': (context) => const Login(),

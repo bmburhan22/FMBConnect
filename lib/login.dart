@@ -98,7 +98,7 @@ class _LoginState extends ConsumerState<Login> {
               length: 6,
               onCompleted: (password) async {
                 await ref
-                    .watch(authProvider.notifier)
+                    .read(authProvider.notifier)
                     .login(context, _itsController.text, password);
                 _otpController.clear();
               },
@@ -114,7 +114,7 @@ class _LoginState extends ConsumerState<Login> {
           // MaterialButton(
           //     color: Colors.teal.shade900,
           //     textColor: Colors.white,
-          //     child: Text('Log in$api_status'),
+          //     child: Text('Log in'),
           //     onPressed: () {
           //       Auth.login(context, _itsController.text, _passwordController.text);
           //     })

@@ -18,15 +18,15 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
   late double rating;
   @override
   void initState() {
-    // TODO: implement initState
+    super.initState();
     rating = widget.rating ?? 1;
   }
 
   @override
   Widget build(BuildContext context) {
     TextEditingController reviewController = TextEditingController();
-    if (widget.rating != null) reviewController.text = widget.review??'';
-  
+    if (widget.rating != null) reviewController.text = widget.review ?? '';
+
     return Dialog(
         child: Padding(
             padding: const EdgeInsets.all(20),
@@ -52,7 +52,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                           : null,
                     ),
                     TextFormField(
-                      canRequestFocus:  (widget.rating == null),
+                      canRequestFocus: (widget.rating == null),
                       minLines: 3,
                       maxLines: 3,
                       controller: reviewController,
@@ -68,6 +68,8 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                             postFeedback(
                                 widget.menu, rating, reviewController.text);
                             Navigator.pop(context);
+                            showSnackBar(
+                                context, 'Thank you for your feedback');
                           }),
                   ].divide(const SizedBox(
                     height: 10,

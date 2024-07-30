@@ -37,11 +37,9 @@ class AuthNotifier extends StateNotifier<User?> {
     String? its = await _storage.read(key: 'its');
     String? otp = await _storage.read(key: 'otp');
     if (its != null && otp != null) {
-      print('authenticating');
       await authenticate(its, otp);
       if (state == null) clearLoginCred();
     }
-    state = User('111', 'NAME');
   }
 
   Future<void> login(BuildContext context, String? its, String? otp) async {

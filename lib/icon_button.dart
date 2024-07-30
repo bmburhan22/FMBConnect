@@ -7,8 +7,16 @@ class TextIconButton extends StatelessWidget {
   final String text;
   final IconData? icon;
   final double borderRadius;
-    const TextIconButton(
-      {this.onTap, this.color=Colors.teal, required this.text, this.textColor=Colors.white, this.icon, this.borderRadius=10, super.key});
+  final MainAxisSize mainAxisSize;
+  const TextIconButton(
+      {this.onTap,
+      this.color = Colors.teal,
+      required this.text,
+      this.textColor = Colors.white,
+      this.icon,
+      this.borderRadius = 10,
+       this.mainAxisSize= MainAxisSize.max,
+      super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,9 +25,10 @@ class TextIconButton extends StatelessWidget {
         child: Container(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
             decoration: BoxDecoration(
-                color: color, borderRadius: BorderRadius.circular(borderRadius)),
+                color: color,
+                borderRadius: BorderRadius.circular(borderRadius)),
             child: Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize: mainAxisSize,
                 children: [
                   if (icon != null) Icon(icon, color: Colors.white),
                   Text(

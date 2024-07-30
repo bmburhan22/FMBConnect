@@ -125,7 +125,7 @@ bool dateInRange(DateTime date, DateTime startDate, DateTime? endDate) =>
 showSnackBar(context, String text) {
   ScaffoldMessenger.of(context).removeCurrentSnackBar();
 
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(backgroundColor: Theme.of(context).primaryColor, content: Text(text)));
 }
 
 List<DateTime> datesInBetween(DateTime startDate, DateTime endDate) {
