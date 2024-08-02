@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fmb_connect/feedback_dialog.dart';
-import 'package:fmb_connect/functions.dart';
 import 'package:fmb_connect/main.dart';
 import 'package:intl/intl.dart';
 

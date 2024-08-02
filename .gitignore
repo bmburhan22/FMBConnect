@@ -1,5 +1,7 @@
 lib/cellbuilder.dart
 .env
+test.py
+service_account.json
 
 # Miscellaneous
 *.class

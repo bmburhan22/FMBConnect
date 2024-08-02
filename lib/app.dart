@@ -64,14 +64,13 @@ class _AppState extends ConsumerState<App> {
         'items': ['eq', '3q']
       }
     };
-    if (res == null) return;
     List<String> todayItems =
         List<String>.from(res['menuToday']?['items'] ?? []);
     setState(() {
       menuToday =
           todayItems.isEmpty ? null : Menu(today().toISODate, todayItems);
       // res['menus'].forEach((m) {if (!menuList.any((i) => i.date == m['date'])) menuList.add(Menu(m['date'], List<String>.from(m['items'])));
-      menuList = List<Menu>.from(res!['menus']
+      menuList = List<Menu>.from(res['menus']
           .map((m) => Menu(m['date'], List<String>.from(m['items']))));
     });
   }

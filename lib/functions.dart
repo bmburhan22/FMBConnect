@@ -2,10 +2,8 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:fmb_connect/feedback_dialog.dart';
 import 'package:fmb_connect/menu_card.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_rating/flutter_rating.dart';
 
 class User {
   final String its, name;
@@ -98,8 +96,9 @@ DateTime today() {
 
 String datesSelected(DateTime? startDate, DateTime? endDate) {
   DateFormat dateFormat = DateFormat('EEE, d/M/yy');
-  if (startDate == endDate || endDate == null)
+  if (startDate == endDate || endDate == null) {
     return dateFormat.format(startDate!);
+  }
 
   return '${dateFormat.format(startDate!)} to ${dateFormat.format(endDate)}';
 }

@@ -1,4 +1,4 @@
-package com.example.fmb_connect
+package com.fmblonavala.fmb_connect
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,16 +1,21 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fmb_connect/app.dart';
 import 'package:fmb_connect/auth.dart';
+import 'package:fmb_connect/firebase_options.dart';
 import 'package:fmb_connect/login.dart';
 import 'package:fmb_connect/messages.dart';
 import 'package:fmb_connect/payment.dart';
 import 'package:fmb_connect/theme.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   await dotenv.load();
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
+  FirebaseMessaging.instance.requestPermission();
   runApp(const ProviderScope(
     child: MyApp(),
   ));
@@ -29,8 +34,10 @@ class MyApp extends StatelessWidget {
               return MaterialApp(
                 theme: theme,
                 builder: (context, child) => Scaffold(
-                  
-                  body:  Container( padding:const  EdgeInsets.symmetric(horizontal: 20), child: const Center (child:LinearProgressIndicator()),),
+                  body: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: const Center(child: LinearProgressIndicator()),
+                  ),
                 ),
               );
             }

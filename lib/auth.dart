@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -18,7 +19,9 @@ class AuthNotifier extends StateNotifier<User?> {
   AuthNotifier() : super(null);
 
   Future<void> authenticate(String its, String otp) async {
-    Map body = {'its': its, 'otp': otp};
+    final fcmtoken = await FirebaseMessaging.instance.getToken();
+    print('Device FCM Token $fcmtoken');
+    Map body = {'its': its, 'otp': otp, 'fcmtoken': fcmtoken};
     Map? data = await fetch('/verify_otp', body);
     state = data?['auth'] ?? true
         ? User(its, 'Burhanuddin M. Bhinderwala')
