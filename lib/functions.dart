@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:fmb_connect/icon_button.dart';
+import 'package:fmb_connect/main.dart';
 import 'package:fmb_connect/menu_card.dart';
 import 'package:intl/intl.dart';
 
@@ -16,25 +19,88 @@ Dio dio = Dio(BaseOptions(
     sendTimeout: const Duration(seconds: 2),
     receiveTimeout: const Duration(seconds: 2)));
 
+initNotifications() {
+  FirebaseMessaging.instance.requestPermission();
+  FirebaseMessaging.instance.getInitialMessage().then(handleMessage);
+  FirebaseMessaging.onMessageOpenedApp.listen(handleMessage);
+  FirebaseMessaging.onMessage.listen(handleMessage);
+}
+
+Future handleMessage(RemoteMessage? message) async {
+  if (message?.notification == null) return;
+  showDialog(
+      context: navkey.currentContext!,
+      builder: (context) => NotificationDialog(
+          message!.notification!.title!, message.notification!.body!));
+}
+
+bool isRoot(Route route) => route.settings.name == '/';
+
+class NotificationDialog extends StatelessWidget {
+  final String title, body;
+  const NotificationDialog(this.title, this.body, {super.key});
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+        content: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Text(title,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium)),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Text(body,
+                          maxLines: 10,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodySmall),
+                    ),
+                    TextIconButton(
+                      text: 'Open Messages',
+                      onTap: () => navkey.currentState
+                          ?.pushNamedAndRemoveUntil('/messages', isRoot),
+                      mainAxisSize: MainAxisSize.min,
+                    )
+                  ].divide(const SizedBox(
+                    height: 10,
+                  )),
+                ),
+              ],
+            )));
+  }
+}
+
 class LoadingDialog {
   final String text;
   late AlertDialog alert;
   LoadingDialog([this.text = "Please wait..."]) {
-   alert= AlertDialog(
-      content:
-          Container(
-            padding: const EdgeInsets.all(10), child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CircularProgressIndicator(),const SizedBox(width: 20,), Text(text)
-        ],
-      )),
+    alert = AlertDialog(
+      content: Container(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(
+                width: 20,
+              ),
+              Text(text)
+            ],
+          )),
     );
   }
-  show(BuildContext context) {
+  show() {
     showDialog(
       barrierDismissible: false,
-      context: context,
+      context: navkey.currentContext!,
       builder: (BuildContext context) {
         return alert;
       },
@@ -42,8 +108,7 @@ class LoadingDialog {
   }
 }
 
-Future<bool> showConfirmationDialog(BuildContext context,
-    [String? title, String? yes, String? no]) async {
+Future<bool> showConfirmationDialog([String? title, String? yes, String? no]) async {
   bool confirm = false;
   AlertDialog alert = AlertDialog(
       content: Column(
@@ -53,7 +118,7 @@ Future<bool> showConfirmationDialog(BuildContext context,
           padding: const EdgeInsets.all(10),
           child: Text(title ?? 'Press confirm or cancel',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium)),
+              style:  Theme.of(navkey.currentContext!).textTheme.bodyMedium)),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -62,21 +127,21 @@ Future<bool> showConfirmationDialog(BuildContext context,
               color: Colors.white,
               child: Text(no ?? 'Cancel'),
               onPressed: () {
-                Navigator.pop(context);
+                navkey.currentState?.pop();
               }),
           MaterialButton(
               color: Colors.teal.shade900,
               textColor: Colors.white,
               child: Text(yes ?? 'Confirm'),
               onPressed: () {
-                Navigator.pop(context);
+                navkey.currentState?.pop();
                 confirm = true;
               }),
         ],
       ),
     ],
   ));
-  return showDialog(context: context, builder: (context) => alert)
+  return  showDialog( context: navkey.currentContext!, builder: (context) => alert)
       .then((_) => confirm);
 }
 
@@ -121,10 +186,10 @@ bool dateInRange(DateTime date, DateTime startDate, DateTime? endDate) =>
 //       .any((skip) => dateInRange(date, skip['startDate'], skip['endDate']));
 // }
 
-showSnackBar(context, String text) {
-  ScaffoldMessenger.of(context).removeCurrentSnackBar();
-
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(backgroundColor: Theme.of(context).primaryColor, content: Text(text)));
+showSnackBar( String text) {
+  ScaffoldMessenger.of(navkey.currentContext!).removeCurrentSnackBar();
+  ScaffoldMessenger.of(navkey.currentContext!).showSnackBar(SnackBar(
+      backgroundColor: Theme.of(navkey.currentContext!).primaryColor, content: Text(text)));
 }
 
 List<DateTime> datesInBetween(DateTime startDate, DateTime endDate) {

@@ -27,7 +27,7 @@ class _AppState extends ConsumerState<App> {
   late DateTime monthStart, monthEnd;
   Menu? menuToday;
   List<Menu> menuList = [], menusFiltered = [];
-  List<DateTime> skippedDates = [];  
+  List<DateTime> skippedDates = [];
   @override
   void initState() {
     super.initState();
@@ -51,11 +51,11 @@ class _AppState extends ConsumerState<App> {
       'its': '111',
       'menus': [
         {
-          'date': '2024-07-30',
+          'date': '2024-08-04',
           'items': ['321eq', 'q']
         },
         {
-          'date': '2024-07-31',
+          'date': '2024-08-05',
           'items': ['51', '316q']
         }
       ],
@@ -99,28 +99,27 @@ class _AppState extends ConsumerState<App> {
 
   _onSkipTiffins() async {
     if (!await showConfirmationDialog(
-        context,
+        
         'Skip tiffin for date:\n${datesSelected(startDate, endDate)} ?',
         'Confirm',
         'Cancel')) return;
     setState(() {
       endDate = endDate ?? startDate;
     });
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
     if (startDate!.isBefore(tomorrow())
         // || datesInBetween(startDate!, endDate!).any((date) => skippedDates.contains(date))
 
         ) {
-showSnackBar(context, 'Select dates from tomorrow onwards');
+      showSnackBar('Select dates from tomorrow onwards');
     } else {
       if ((await post('/skip', {
-            'its':ref.read(authProvider)!.its,
+            'its': ref.read(authProvider)!.its,
             'startDate': startDate!.toISODate,
             'endDate': endDate!.toISODate
           })) !=
           null) {
-        showSnackBar(context,'ITS ${ref.read(authProvider)!.its} skipped tiffin for date ${datesSelected(startDate, endDate)}');
+        showSnackBar(
+            'ITS ${ref.read(authProvider)!.its} skipped tiffin for date ${datesSelected(startDate, endDate)}');
         fetchSkips();
       }
     }
@@ -130,14 +129,15 @@ showSnackBar(context, 'Select dates from tomorrow onwards');
     setState(() {
       endDate = endDate ?? startDate;
     });
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(navkey.currentContext!).hideCurrentSnackBar();
     if ((await delete('/skip', {
-          'its':ref.read(authProvider)!.its,
+          'its': ref.read(authProvider)!.its,
           'startDate': startDate!.toISODate,
           'endDate': endDate!.toISODate
         })) !=
         null) {
-          showSnackBar(context,'ITS ${ref.read(authProvider)!.its} unskipped tiffin for date ${datesSelected(startDate, endDate)}');
+      showSnackBar(
+          'ITS ${ref.read(authProvider)!.its} unskipped tiffin for date ${datesSelected(startDate, endDate)}');
       fetchSkips();
     }
   }
@@ -184,7 +184,7 @@ showSnackBar(context, 'Select dates from tomorrow onwards');
                       thickness: 2,
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: SfDateRangePicker(
                           onViewChanged: (args) async {
                             await Future.delayed(
@@ -232,7 +232,6 @@ showSnackBar(context, 'Select dates from tomorrow onwards');
                                 onPressed: _onUnskipTiffins,
                                 color: Colors.teal.shade900,
                                 child: Text(
-                                  
                                   'Unskip Tiffins',
                                   style: Theme.of(context)
                                       .textTheme

@@ -46,7 +46,6 @@ dependencies:
   flutter_riverpod:
   firebase_messaging:
   firebase_core: ^2.24.2
-  
   intl: any
 flutter_launcher_icons:
   android: true

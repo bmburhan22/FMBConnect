@@ -76,12 +76,12 @@ class _LoginState extends ConsumerState<Login> {
                       onTap: () async {
                         if (seconds == 0) {
                           if (_itsController.text.isEmpty) {
-                            showSnackBar(context, 'ITS field is empty');
+                            showSnackBar( 'ITS field is empty');
                             return;
                           }
                           Map? res = await post(
                               '/send_otp', {'its': _itsController.text});
-                          showSnackBar(context, res?['message']);
+                          showSnackBar(res?['message']);
                           if (res?['error']?.isNotEmpty ?? false) return;
 
                           startTimer();
@@ -98,7 +98,7 @@ class _LoginState extends ConsumerState<Login> {
               onCompleted: (password) async {
                 await ref
                     .read(authProvider.notifier)
-                    .login(context, _itsController.text, password);
+                    .login( _itsController.text, password);
                 _otpController.clear();
               },
               defaultPinTheme: PinTheme(

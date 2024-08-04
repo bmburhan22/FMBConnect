@@ -50,7 +50,7 @@ class _SidebarState extends ConsumerState<Sidebar> {
                     TextIconButton(
                         text: 'Logout',
                         onTap: () =>
-                            ref.read(authProvider.notifier).logout(context),
+                            ref.read(authProvider.notifier).logout(),
                         icon: Icons.chevron_left,
                         color: Colors.red.shade600,
                         mainAxisSize: MainAxisSize.min,
@@ -62,12 +62,12 @@ class _SidebarState extends ConsumerState<Sidebar> {
                     TextIconButton(
                       icon: Icons.currency_rupee,
                       text: 'Payment',
-                      onTap: () => Navigator.pushNamed(context, '/payment'),
+                      onTap: () => navkey.currentState?.pushNamed( '/payment'),
                     ),
                     TextIconButton(
                       icon: Icons.message,
                       text: 'Messages',
-                      onTap: () => Navigator.pushNamed(context, '/messages'),
+                      onTap: () => navkey.currentState?.pushNamed( '/messages'),
                     ),
                   ]
                       .divide(const SizedBox(

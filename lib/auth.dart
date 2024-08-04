@@ -1,8 +1,8 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fmb_connect/functions.dart';
+import 'package:fmb_connect/main.dart';
 
 const FlutterSecureStorage _storage = FlutterSecureStorage();
 clearLoginCred() async {
@@ -20,7 +20,7 @@ class AuthNotifier extends StateNotifier<User?> {
 
   Future<void> authenticate(String its, String otp) async {
     final fcmtoken = await FirebaseMessaging.instance.getToken();
-    print('Device FCM Token $fcmtoken');
+    print('FCM Token $fcmtoken');
     Map body = {'its': its, 'otp': otp, 'fcmtoken': fcmtoken};
     Map? data = await fetch('/verify_otp', body);
     state = data?['auth'] ?? true
@@ -28,11 +28,11 @@ class AuthNotifier extends StateNotifier<User?> {
         : User(its, 'Firstname Lastname');
   }
 
-  logout(BuildContext context) {
+  logout() {
     clearLoginCred();
     state = null;
-    Navigator.pop(context);
-    Navigator.pushReplacementNamed(context, 'login');
+    navkey.currentState?.pop();
+    navkey.currentState?.pushReplacementNamed( 'login');
   }
 
   Future<void> initAuth() async {
@@ -45,20 +45,20 @@ class AuthNotifier extends StateNotifier<User?> {
     }
   }
 
-  Future<void> login(BuildContext context, String? its, String? otp) async {
+  Future<void> login(String? its, String? otp) async {
     if (its == null || otp == null || its.isEmpty || otp.isEmpty) {
-      showSnackBar(context, 'Enter ITS and OTP');
+      showSnackBar('Enter ITS and OTP');
       return;
     }
-    LoadingDialog('Logging in...').show(context);
+    LoadingDialog('Logging in...').show();
     await authenticate(its, otp);
-    Navigator.pop(context);
+    navkey.currentState?.pop();
 
     if (state == null) {
-      showSnackBar(context, 'Invalid OTP');
+      showSnackBar( 'Invalid OTP');
     } else {
       saveLoginCred(its, otp);
-      Navigator.pushReplacementNamed(context, '/');
+      navkey.currentState?.pushReplacementNamed('/');
     }
   }
 }
