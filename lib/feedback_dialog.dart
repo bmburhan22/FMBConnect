@@ -1,33 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating/flutter_rating.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fmb_connect/auth.dart';
 import 'package:fmb_connect/functions.dart';
 import 'package:fmb_connect/main.dart';
 import 'package:fmb_connect/menu_card.dart';
 
-class FeedbackDialog extends StatefulWidget {
+class FeedbackDialog extends ConsumerStatefulWidget {
   final Menu menu;
-  final double? rating;
-  final String? review;
-  const FeedbackDialog(this.menu, this.rating, this.review, {super.key});
-
+  final Function onSubmit;
+  const FeedbackDialog(this.menu, this.onSubmit,{ super.key});
   @override
-  State<FeedbackDialog> createState() => _FeedbackDialogState();
+  ConsumerState<FeedbackDialog> createState() => _FeedbackDialogState();
 }
 
-class _FeedbackDialogState extends State<FeedbackDialog> {
+class _FeedbackDialogState extends ConsumerState<FeedbackDialog> {
   late double rating;
-  late String review;
+  late TextEditingController reviewController;
   @override
   void initState() {
     super.initState();
-    rating = widget.rating ?? 1;
-    review = widget.review??'';
+  reviewController = TextEditingController(text:  widget.menu.review ?? '');
+    rating = widget.menu.rating ?? 1;
+
   }
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController reviewController = TextEditingController();
-    reviewController.text = review;
     return Dialog(
         child: Padding(
             padding: const EdgeInsets.all(20),
@@ -37,7 +36,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                 Padding(
                     padding: const EdgeInsets.all(10),
                     child: Text(
-                        widget.rating == null
+                        widget.menu.rating == null
                             ? 'Give feedback'
                             : 'Your feedback',
                         textAlign: TextAlign.center,
@@ -48,32 +47,29 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                     StarRating(
                       size: 48,
                       rating: rating,
-                      onRatingChanged: widget.rating == null
+                      onRatingChanged: widget.menu.rating == null
                           ? (r) => setState(() => rating = r)
                           : null,
                     ),
                     TextFormField(
-                      onEditingComplete: () {setState(() {
-                        review=reviewController.text;
-                      });},
-                      
-                      canRequestFocus: (widget.rating == null),
+                      canRequestFocus: (widget.menu.rating == null),
                       minLines: 3,
                       maxLines: 3,
                       controller: reviewController,
                       decoration: const InputDecoration(
                           labelText: 'Review', border: OutlineInputBorder()),
                     ),
-                    if (widget.rating == null)
+                    if (widget.menu.rating == null)
                       MaterialButton(
                           color: Colors.teal.shade900,
                           textColor: Colors.white,
                           child: const Text('Submit'),
                           onPressed: () {
-                            postFeedback(
+                            postFeedback(ref.read(authProvider)?.its ?? '',
                                 widget.menu, rating, reviewController.text);
-                            Navigator.pop(context);
-                            showSnackBar( 'Thank you for your feedback');
+                            showSnackBar('Thank you for your feedback');
+                            navkey.currentState?.pop();
+                            widget.onSubmit();
                           }),
                   ].divide(const SizedBox(
                     height: 10,

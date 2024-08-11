@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:fmb_connect/feedback_dialog.dart';
+import 'package:fmb_connect/functions.dart';
 import 'package:fmb_connect/main.dart';
 import 'package:intl/intl.dart';
 
 class Menu {
-  final String date;
-  DateTime get dateTime => DateFormat("yyyy-MM-dd").parse(date);
-  final List<String> items;
-  const Menu(this.date, this.items);
+  String? date;
+  DateTime get dateTime => DateFormat("yyyy-MM-dd").parse(date ?? '');
+  List<String>? items;
+  double? rating;
+  String? review;
+  Menu(Map? menuMap) {
+    date = menuMap?['date'];
+    items = List<String>.from(menuMap?['items']);
+    rating =  menuMap?['rating']?.toDouble();
+    review = menuMap?['review'];
+  }
   @override
   String toString() => '$date $items';
 }
@@ -15,7 +23,8 @@ class Menu {
 class MenuCard extends StatelessWidget {
   final Menu? menu;
   final bool skipped;
-  const MenuCard(this.menu, this.skipped, {super.key});
+  final Function fetchMenu;
+  const MenuCard(this.menu, this.skipped, this.fetchMenu, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +32,12 @@ class MenuCard extends StatelessWidget {
         ? const NoTiffinCard()
         : GestureDetector(
             onTap: () {
-              if (menu != null)  showDialog(context: context, builder: (context) => FeedbackDialog(menu!, null,''));
+              if (menu != null && !skipped && menu!.dateTime.isBefore(today())) {
+                showDialog(
+                    context: context,
+                    builder: (context) => FeedbackDialog(menu!,fetchMenu
+                    ));
+              }
             },
             child: Container(
               decoration: BoxDecoration(
@@ -39,24 +53,31 @@ class MenuCard extends StatelessWidget {
               padding: const EdgeInsets.all(10),
               child: Row(
                   children: [
-                SizedBox(
-                    width: 50,
+                Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.teal //.shade200
+                        ),
+                    width: 60,
                     child: Text(
                       DateFormat('EEE\nMMM dd').format(menu!.dateTime),
-                      textAlign: TextAlign.right,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium!
-                          .copyWith(fontWeight: FontWeight.w600),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          fontWeight: FontWeight.w600, color: Colors.white),
                     )),
                 Expanded(
                     child: Text(
-                  menu!.items.join(', '),
+                  (menu!.items??[]).join(', '),
                   style: Theme.of(context)
                       .textTheme
                       .bodyMedium!
                       .copyWith(fontWeight: FontWeight.w500),
                 )),
+                if (!skipped && menu!.dateTime.isBefore(today()))
+                  Icon(
+                    Icons.rate_review,
+                    color: Colors.teal.shade900,
+                  ),
                 skipped
                     ? const Icon(
                         Icons.no_meals,

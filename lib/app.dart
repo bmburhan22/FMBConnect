@@ -40,38 +40,37 @@ class _AppState extends ConsumerState<App> {
   }
 
   Future<void> fetchMenu() async {
-    // if (startDate == null || endDate == null) return;
-    Map? res //=await fetch('/menu', {
-        //   'its': ref.read(authProvider)!.its,
-        //   'startDate': monthStart.toISODate,
-        //   'endDate': monthEnd.toISODate,
-        //   'today': today().toISODate
-        // });
-        = {
+    if (startDate == null || endDate == null) return;
+    Map? res =await fetch('/menu', {
+          'its': ref.read(authProvider)!.its,
+          'startDate': monthStart.toISODate,
+          'endDate': monthEnd.toISODate,
+          'today': today().toISODate
+        });
+    res = res ?? {
       'its': '111',
       'menus': [
         {
-          'date': '2024-08-04',
+          'date': '2024-08-05',
           'items': ['321eq', 'q']
         },
         {
-          'date': '2024-08-05',
+          'date': '2024-08-09',
           'items': ['51', '316q']
         }
       ],
       'menuToday': {
-        'date': '2024-07-29',
+        'date': '2024-08-07',
         'items': ['eq', '3q']
       }
     };
-    List<String> todayItems =
-        List<String>.from(res['menuToday']?['items'] ?? []);
+       Map? menuTodayMap= res?['menuToday'];
+    List<String> todayItems = List<String>.from(menuTodayMap?['items'] ?? []);
     setState(() {
-      menuToday =
-          todayItems.isEmpty ? null : Menu(today().toISODate, todayItems);
+      menuToday = todayItems.isEmpty ? null : Menu(menuTodayMap);
       // res['menus'].forEach((m) {if (!menuList.any((i) => i.date == m['date'])) menuList.add(Menu(m['date'], List<String>.from(m['items'])));
-      menuList = List<Menu>.from(res['menus']
-          .map((m) => Menu(m['date'], List<String>.from(m['items']))));
+      menuList = List<Menu>.from(res?['menus']
+          .map((m) => Menu(m)));
     });
   }
 
@@ -157,7 +156,9 @@ class _AppState extends ConsumerState<App> {
         drawer: const Sidebar(),
         body: RefreshIndicator(
             onRefresh: refresh,
-            child: SingleChildScrollView(
+            child:
+            
+            SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -178,7 +179,7 @@ class _AppState extends ConsumerState<App> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child:
-                          MenuCard(menuToday, skippedDates.contains(today())),
+                          MenuCard(menuToday, skippedDates.contains(today()), fetchMenu ),
                     ),
                     const Divider(
                       thickness: 2,
@@ -258,7 +259,7 @@ class _AppState extends ConsumerState<App> {
                     Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: menusFiltered.isEmpty
-                            ? const MenuCard(null, true)
+                            ?  MenuCard(null, true, fetchMenu)
                             : ListView.separated(
                                 physics: const NeverScrollableScrollPhysics(),
                                 itemCount: menusFiltered.length,
@@ -266,7 +267,9 @@ class _AppState extends ConsumerState<App> {
                                 itemBuilder: (_, i) {
                                   final menu = menusFiltered[i];
                                   return MenuCard(menu,
-                                      skippedDates.contains(menu.dateTime));
+                                      skippedDates.contains(menu.dateTime ),
+                                      fetchMenu
+                                      );
                                 },
                                 separatorBuilder: (_, i) => const SizedBox(
                                   height: 10,

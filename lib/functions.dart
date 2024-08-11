@@ -21,7 +21,6 @@ Dio dio = Dio(BaseOptions(
 
 initNotifications() {
   FirebaseMessaging.instance.requestPermission();
-  FirebaseMessaging.instance.getInitialMessage().then(handleMessage);
   FirebaseMessaging.onMessageOpenedApp.listen(handleMessage);
   FirebaseMessaging.onMessage.listen(handleMessage);
 }
@@ -48,7 +47,7 @@ class NotificationDialog extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(10),  
                     child: Text(title,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium)),
@@ -145,8 +144,9 @@ Future<bool> showConfirmationDialog([String? title, String? yes, String? no]) as
       .then((_) => confirm);
 }
 
-Future<void> postFeedback(Menu menu, double rating, String review) async {
+Future<bool> postFeedback(String its, Menu menu, double rating, String review) async {
   print('${menu.date} $rating $review');
+  return (await post('/feedback', {'its':int.parse(its),'date':menu.date, 'rating':rating,'review':review }))?['status']??false;
 }
 
 DateTime tomorrow() {

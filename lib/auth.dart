@@ -6,6 +6,7 @@ import 'package:fmb_connect/main.dart';
 
 const FlutterSecureStorage _storage = FlutterSecureStorage();
 clearLoginCred() async {
+  await FirebaseMessaging.instance.deleteToken();
   await _storage.delete(key: 'its');
   await _storage.delete(key: 'otp');
 }
@@ -22,10 +23,12 @@ class AuthNotifier extends StateNotifier<User?> {
     final fcmtoken = await FirebaseMessaging.instance.getToken();
     print('FCM Token $fcmtoken');
     Map body = {'its': its, 'otp': otp, 'fcmtoken': fcmtoken};
-    Map? data = await fetch('/verify_otp', body);
-    state = data?['auth'] ?? true
-        ? User(its, 'Burhanuddin M. Bhinderwala')
-        : User(its, 'Firstname Lastname');
+    Map? data = null;//await post('/verify_otp', body);
+    state = data?['auth'] ?? false
+        ? User(its, data?['name']??'')
+        :User(its, 'Burhanuddin M. Bhinderwala');
+        // : null;
+        
   }
 
   logout() {
