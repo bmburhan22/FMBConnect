@@ -25,6 +25,8 @@ class AuthNotifier extends StateNotifier<User?> {
     Map body = {'its': its, 'otp': otp, 'fcmtoken': fcmtoken};
     Map? data = null;//await post('/verify_otp', body);
     state = data?['auth'] ?? false
+
+    
         ? User(its, data?['name']??'')
         :User(its, 'Burhanuddin M. Bhinderwala');
         // : null;

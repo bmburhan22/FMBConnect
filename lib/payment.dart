@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fmb_connect/auth.dart';
+import 'package:fmb_connect/constdata.dart';
 import 'package:fmb_connect/functions.dart';
 import 'package:fmb_connect/main.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -12,27 +13,18 @@ class Payment extends ConsumerStatefulWidget {
 }
 
 class _PaymentState extends ConsumerState<Payment> {
-
-
-  
-  List<Map<String, dynamic>> paymentRecords =
-  // [
-  //   {'year': 2024, 'total': 400, 'paid': 400, 'pending':0},
-  //   {'year': 2023, 'total': 400, 'paid': 400, 'pending':0},
-  //   {'year': 2022, 'total': 300, 'paid': 300, 'pending':0},
-  //   {'year': 2021, 'total': 400, 'paid': 400, 'pending':0},
-  //   {'year': 2020, 'total': 200, 'paid': 200, 'pending':0},
-  // ];
-  [];
-
+  List<Map<String, dynamic>> paymentRecords = [];
+  bool loading=true;
   Future<void> fetchPaymentInfo() async {
+    setState(() {loading=true;});
     Map? res = await fetch('/payment_info', {
       'its': ref.read(authProvider)!.its,
     });
+    setState(() {paymentRecords = constPaymentData;loading=false;});
     if (res ==null)return;
     setState(() {
-    paymentRecords= [];// List<Map<String, dynamic>>.from(res['records'] ?? []);
-      
+    paymentRecords= List<Map<String, dynamic>>.from(res['records']);
+    loading=false;
     });
   }
 
@@ -45,21 +37,21 @@ class _PaymentState extends ConsumerState<Payment> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return 
+                 RefreshIndicator(onRefresh:      fetchPaymentInfo,        child:
+    
+    Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.teal.shade900,
           foregroundColor: Colors.white,
           title: const Text('Payment Information'),
         ),
-        body: 
-        RefreshIndicator(
-            onRefresh:      fetchPaymentInfo
-            ,
-          
-            child:
-             SingleChildScrollView(
+        body: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
+
+                child: 
+
+                Column(
 // crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -73,8 +65,8 @@ class _PaymentState extends ConsumerState<Payment> {
                               .copyWith(fontWeight: FontWeight.w700),
                         )),
                     Skeletonizer(
-                      containersColor: Colors.teal.shade900,
-                                enabled: paymentRecords.isEmpty
+                      containersColor: Colors.teal.shade100,
+                                enabled: loading
                                   ,child:  
                                   Container(
                         margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -94,8 +86,10 @@ class _PaymentState extends ConsumerState<Payment> {
                                                               
                             Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
+
                                 children: 
-                                // [Text('No data',style: Theme.of(context).textTheme.titleLarge!.copyWith(color: Colors.blueGrey.shade900))]:
+                                !loading&&paymentRecords.isEmpty?
+                                [Text('No data found', style: Theme.of(context).textTheme.titleLarge!.copyWith(color: Colors.white,  ) )]:
                                 [
                               Text(
                                   'Year ${paymentRecords.firstOrNull?['year']}',
@@ -159,7 +153,7 @@ class _PaymentState extends ConsumerState<Payment> {
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
-                                                  Text('Year ${data['year']}',
+                                                  Text('Year: ${data['year']}',
                                                       style: Theme.of(context)
                                                           .textTheme
                                                           .titleMedium!

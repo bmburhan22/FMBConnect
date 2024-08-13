@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_rating/flutter_rating.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fmb_connect/app.dart';
 import 'package:fmb_connect/auth.dart';
 import 'package:fmb_connect/functions.dart';
 import 'package:fmb_connect/main.dart';
@@ -9,7 +11,8 @@ import 'package:fmb_connect/menu_card.dart';
 class FeedbackDialog extends ConsumerStatefulWidget {
   final Menu menu;
   final Function onSubmit;
-  const FeedbackDialog(this.menu, this.onSubmit,{ super.key});
+  final bool withFeedback;
+  const FeedbackDialog(this.menu, this.withFeedback, this.onSubmit, { super.key});
   @override
   ConsumerState<FeedbackDialog> createState() => _FeedbackDialogState();
 }
@@ -28,22 +31,29 @@ class _FeedbackDialogState extends ConsumerState<FeedbackDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-        child: Padding(
+      
+        child:SingleChildScrollView(child: 
+         Container(
             padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Text(
+                
+                 Text('Menu for ${widget.menu.dateTime.toDateString}',style: Theme.of(context).textTheme.headlineSmall),
+Wrap(children: 
+(widget.menu.items??[])
+.map((i) =>   Chip( label:  Text(i) )).toList().divide(const SizedBox(width: 10,) )
+)
+,
+if (widget.withFeedback)
+...[
+const Divider(),
+                       Text(
                         widget.menu.rating == null
                             ? 'Give feedback'
                             : 'Your feedback',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.headlineSmall)),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
+                        style: Theme.of(context).textTheme.headlineSmall),
+                
                     StarRating(
                       size: 48,
                       rating: rating,
@@ -71,11 +81,12 @@ class _FeedbackDialogState extends ConsumerState<FeedbackDialog> {
                             navkey.currentState?.pop();
                             widget.onSubmit();
                           }),
+              ]
                   ].divide(const SizedBox(
                     height: 10,
                   )),
                 ),
-              ],
-            )));
+              
+             )         ));
   }
 }

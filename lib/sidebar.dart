@@ -62,12 +62,12 @@ class _SidebarState extends ConsumerState<Sidebar> {
                     TextIconButton(
                       icon: Icons.currency_rupee,
                       text: 'Payment',
-                      onTap: () => navkey.currentState?.pushNamed( '/payment'),
+                      onTap: ()=>navkey. currentState?.pushNamed( '/payment'),
                     ),
                     TextIconButton(
                       icon: Icons.message,
                       text: 'Messages',
-                      onTap: () => navkey.currentState?.pushNamed( '/messages'),
+                      onTap: ()=> navkey.currentState?.pushNamed( '/messages'),
                     ),
                   ]
                       .divide(const SizedBox(

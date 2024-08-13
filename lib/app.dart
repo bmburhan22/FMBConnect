@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fmb_connect/auth.dart';
+import 'package:fmb_connect/constdata.dart';
 import 'package:fmb_connect/functions.dart';
 import 'package:fmb_connect/main.dart';
 import 'package:fmb_connect/menu_card.dart';
@@ -10,7 +11,8 @@ import 'package:intl/intl.dart';
 
 extension DateTimeExtension on DateTime {
   String get toISODate => DateFormat('yyyy-MM-dd').format(this);
-  String get toStringCustom => DateFormat('h:m a, d/M/y').format(this);
+  String get toDateString => DateFormat('MMM d, yyyy').format(this);
+  String get toDateTimeString => DateFormat('h:mm a, d/M/y').format(this);
   // DateTime get firstDayOfMonth => add(const Duration(days: 1));
   DateTime get lastDayOfMonth =>
       month < 12 ? DateTime(year, month + 1, 0) : DateTime(year + 1, 1, 0);
@@ -23,6 +25,7 @@ class App extends ConsumerStatefulWidget {
 }
 
 class _AppState extends ConsumerState<App> {
+  bool loading=true;
   DateTime? startDate = today(), endDate = today();
   late DateTime monthStart, monthEnd;
   Menu? menuToday;
@@ -47,30 +50,17 @@ class _AppState extends ConsumerState<App> {
           'endDate': monthEnd.toISODate,
           'today': today().toISODate
         });
-    res = res ?? {
-      'its': '111',
-      'menus': [
-        {
-          'date': '2024-08-05',
-          'items': ['321eq', 'q']
-        },
-        {
-          'date': '2024-08-09',
-          'items': ['51', '316q']
-        }
-      ],
-      'menuToday': {
-        'date': '2024-08-07',
-        'items': ['eq', '3q']
-      }
-    };
-       Map? menuTodayMap= res?['menuToday'];
-    List<String> todayItems = List<String>.from(menuTodayMap?['items'] ?? []);
     setState(() {
-      menuToday = todayItems.isEmpty ? null : Menu(menuTodayMap);
+      menuList=constMenuList;
+      menuToday=constMenuToday;
+      loading=false;
+    });
+    if (res==null)return;
+    setState(() {
+      menuToday = Menu(res['menuToday']);
       // res['menus'].forEach((m) {if (!menuList.any((i) => i.date == m['date'])) menuList.add(Menu(m['date'], List<String>.from(m['items'])));
-      menuList = List<Menu>.from(res?['menus']
-          .map((m) => Menu(m)));
+      menuList = List<Menu>.from(res['menus'].map((m) => Menu(m)));
+      loading=false;
     });
   }
 
@@ -81,6 +71,10 @@ class _AppState extends ConsumerState<App> {
 
   Future<void> fetchSkips() async {
     Map? res = await fetch('/skip', {'its': ref.read(authProvider)!.its});
+    setState(() {
+      skippedDates=constSkippedDates.map((String d) => DateFormat('yyyy-MM-dd').parse(d))
+          .toList();
+    });
     if (res == null) return;
     setState(() {
       skippedDates = List<String>.from(res['dates'])
@@ -117,9 +111,7 @@ class _AppState extends ConsumerState<App> {
             'endDate': endDate!.toISODate
           })) !=
           null) {
-        showSnackBar(
-            'ITS ${ref.read(authProvider)!.its} skipped tiffin for date ${datesSelected(startDate, endDate)}');
-        fetchSkips();
+        fetchSkips().then((_)=>showSnackBar('ITS ${ref.read(authProvider)!.its} skipped tiffin for date ${datesSelected(startDate, endDate)}'));
       }
     }
   }
@@ -135,9 +127,7 @@ class _AppState extends ConsumerState<App> {
           'endDate': endDate!.toISODate
         })) !=
         null) {
-      showSnackBar(
-          'ITS ${ref.read(authProvider)!.its} unskipped tiffin for date ${datesSelected(startDate, endDate)}');
-      fetchSkips();
+      fetchSkips().then((_)=>showSnackBar('ITS ${ref.read(authProvider)!.its} unskipped tiffin for date ${datesSelected(startDate, endDate)}'));
     }
   }
 
@@ -147,18 +137,16 @@ class _AppState extends ConsumerState<App> {
         .where((menu) =>
             dateInRange(menu.dateTime, startDate!, endDate ?? startDate!))
         .toList();
-    return Scaffold(
+    return 
+        RefreshIndicator(onRefresh: refresh,child:
+    Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.teal.shade900,
           foregroundColor: Colors.white,
           title: const Text('FMB Connect'),
         ),
         drawer: const Sidebar(),
-        body: RefreshIndicator(
-            onRefresh: refresh,
-            child:
-            
-            SingleChildScrollView(
+        body: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -178,8 +166,7 @@ class _AppState extends ConsumerState<App> {
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child:
-                          MenuCard(menuToday, skippedDates.contains(today()), fetchMenu ),
+                      child:  MenuCard(menuToday, skippedDates.contains(today()), fetchMenu, loading: loading, ),
                     ),
                     const Divider(
                       thickness: 2,
