@@ -29,15 +29,15 @@ Future handleMessage(RemoteMessage? message) async {
   if (message?.notification == null) return;
   showDialog(
       context: navkey.currentContext!,
-      builder: (context) => NotificationDialog(
+      builder: (context) => NotificationDialog(message!.data['type'],
           message!.notification!.title!, message.notification!.body!));
 }
 
 bool isRoot(Route route) => route.settings.name == '/';
 
 class NotificationDialog extends StatelessWidget {
-  final String title, body;
-  const NotificationDialog(this.title, this.body, {super.key});
+  final String title, body, type;
+  const NotificationDialog(this.type, this.title, this.body, {super.key});
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -47,7 +47,7 @@ class NotificationDialog extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
-                    padding: const EdgeInsets.all(10),  
+                    padding: const EdgeInsets.all(10),
                     child: Text(title,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium)),
@@ -63,9 +63,14 @@ class NotificationDialog extends StatelessWidget {
                           style: Theme.of(context).textTheme.bodySmall),
                     ),
                     TextIconButton(
-                      text: 'Open Messages',
-                      onTap: () => navkey.currentState
-                          ?.pushNamedAndRemoveUntil('/messages', isRoot),
+                      text: 'View',
+                      onTap: () => navkey.currentState?.pushNamedAndRemoveUntil(
+                          type == 'menu'
+                              ? '/'
+                              : type == 'payment'
+                                  ? '/payment'
+                                  : '/messages',
+                          isRoot),
                       mainAxisSize: MainAxisSize.min,
                     )
                   ].divide(const SizedBox(
@@ -107,7 +112,8 @@ class LoadingDialog {
   }
 }
 
-Future<bool> showConfirmationDialog([String? title, String? yes, String? no]) async {
+Future<bool> showConfirmationDialog(
+    [String? title, String? yes, String? no]) async {
   bool confirm = false;
   AlertDialog alert = AlertDialog(
       content: Column(
@@ -117,7 +123,7 @@ Future<bool> showConfirmationDialog([String? title, String? yes, String? no]) as
           padding: const EdgeInsets.all(10),
           child: Text(title ?? 'Press confirm or cancel',
               textAlign: TextAlign.center,
-              style:  Theme.of(navkey.currentContext!).textTheme.bodyMedium)),
+              style: Theme.of(navkey.currentContext!).textTheme.bodyMedium)),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -140,13 +146,21 @@ Future<bool> showConfirmationDialog([String? title, String? yes, String? no]) as
       ),
     ],
   ));
-  return  showDialog( context: navkey.currentContext!, builder: (context) => alert)
-      .then((_) => confirm);
+  return showDialog(
+      context: navkey.currentContext!,
+      builder: (context) => alert).then((_) => confirm);
 }
 
-Future<bool> postFeedback(String its, Menu menu, double rating, String review) async {
+Future<bool> postFeedback(
+    String its, Menu menu, double rating, String review) async {
   print('${menu.date} $rating $review');
-  return (await post('/feedback', {'its':int.parse(its),'date':menu.date, 'rating':rating,'review':review }))?['status']??false;
+  return (await post('/feedback', {
+        'its': int.parse(its),
+        'date': menu.date,
+        'rating': rating,
+        'review': review
+      }))?['status'] ??
+      false;
 }
 
 DateTime tomorrow() {
@@ -171,25 +185,27 @@ String datesSelected(DateTime? startDate, DateTime? endDate) {
 bool dateInRange(DateTime date, DateTime startDate, DateTime? endDate) =>
     date == startDate ||
     endDate != null && !date.isAfter(endDate) && !date.isBefore(startDate);
+/*
+List<DateTime> skippedDatesList(String its, List<DateTime> skippedDates ) {
+  Set<DateTime> dates = {};
+  for (var skip in skipsList.where((skip) => skip["its"] == its)) {
+    dates.addAll(datesInBetween(skip['startDate'], skip['endDate']));
+  }
+  return dates.toList();
+}
 
-// List<DateTime> skippedDatesList(String its, List<DateTime> skippedDates ) {
-//   Set<DateTime> dates = {};
-//   for (var skip in skipsList.where((skip) => skip["its"] == its)) {
-//     dates.addAll(datesInBetween(skip['startDate'], skip['endDate']));
-//   }
-//   return dates.toList();
-// }
+bool dateSkipped(DateTime date, String its, List<Map> skipsList) {
+  return skipsList
+      .where((skip) => skip["its"] == its)
+      .any((skip) => dateInRange(date, skip['startDate'], skip['endDate']));
+}
+*/
 
-// bool dateSkipped(DateTime date, String its, List<Map> skipsList) {
-//   return skipsList
-//       .where((skip) => skip["its"] == its)
-//       .any((skip) => dateInRange(date, skip['startDate'], skip['endDate']));
-// }
-
-showSnackBar( String text) {
+showSnackBar(String text) {
   ScaffoldMessenger.of(navkey.currentContext!).removeCurrentSnackBar();
   ScaffoldMessenger.of(navkey.currentContext!).showSnackBar(SnackBar(
-      backgroundColor: Theme.of(navkey.currentContext!).primaryColor, content: Text(text)));
+      backgroundColor: Theme.of(navkey.currentContext!).primaryColor,
+      content: Text(text)));
 }
 
 List<DateTime> datesInBetween(DateTime startDate, DateTime endDate) {

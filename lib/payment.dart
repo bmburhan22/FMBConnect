@@ -20,7 +20,10 @@ class _PaymentState extends ConsumerState<Payment> {
     Map? res = await fetch('/payment_info', {
       'its': ref.read(authProvider)!.its,
     });
-    setState(() {paymentRecords = constPaymentData;loading=false;});
+    /*
+    POPULATE CONST DATA: PAYMENT
+     setState(() {paymentRecords = constPaymentData;loading=false;});
+     */
     if (res ==null)return;
     setState(() {
     paymentRecords= List<Map<String, dynamic>>.from(res['records']);
@@ -52,7 +55,9 @@ class _PaymentState extends ConsumerState<Payment> {
                 child: 
 
                 Column(
-// crossAxisAlignment: CrossAxisAlignment.center,
+/*
+ crossAxisAlignment: CrossAxisAlignment.center,
+ */
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Padding(
@@ -74,11 +79,14 @@ class _PaymentState extends ConsumerState<Payment> {
                         decoration: BoxDecoration(
                             color: Colors.teal.shade900,
                             borderRadius: BorderRadius.circular(15),
-                            // border: Border.all(width: 2, color: Colors.teal.shade900)
+                            /* 
+                            border: Border.all(width: 2, color: Colors.teal.shade900)
+                            */
                             ),
                         child:
 
-                            /*Row(
+                            /*
+                            Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceEvenly,
                                   children: [

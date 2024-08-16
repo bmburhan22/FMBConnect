@@ -21,7 +21,11 @@ bool loading=true;
     Map? res = await fetch('/messages', {
       'its': ref.read(authProvider)!.its,
     });
+    /* 
+    POPULATE CONST DATA: MESSAGES
+
     setState(() {messages = constMessages;loading=false;});
+    */
     if (res == null) return;
     setState(() {
       messages = List<Map<String, dynamic>>.from(res['messages'] ?? []);

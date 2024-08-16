@@ -13,7 +13,6 @@ extension DateTimeExtension on DateTime {
   String get toISODate => DateFormat('yyyy-MM-dd').format(this);
   String get toDateString => DateFormat('MMM d, yyyy').format(this);
   String get toDateTimeString => DateFormat('h:mm a, d/M/y').format(this);
-  // DateTime get firstDayOfMonth => add(const Duration(days: 1));
   DateTime get lastDayOfMonth =>
       month < 12 ? DateTime(year, month + 1, 0) : DateTime(year + 1, 1, 0);
 }
@@ -25,7 +24,7 @@ class App extends ConsumerStatefulWidget {
 }
 
 class _AppState extends ConsumerState<App> {
-  bool loading=true;
+  bool loading = true;
   DateTime? startDate = today(), endDate = today();
   late DateTime monthStart, monthEnd;
   Menu? menuToday;
@@ -44,23 +43,29 @@ class _AppState extends ConsumerState<App> {
 
   Future<void> fetchMenu() async {
     if (startDate == null || endDate == null) return;
-    Map? res =await fetch('/menu', {
-          'its': ref.read(authProvider)!.its,
-          'startDate': monthStart.toISODate,
-          'endDate': monthEnd.toISODate,
-          'today': today().toISODate
-        });
-    setState(() {
-      menuList=constMenuList;
-      menuToday=constMenuToday;
-      loading=false;
+    Map? res = await fetch('/menu', {
+      'its': ref.read(authProvider)!.its,
+      'startDate': monthStart.toISODate,
+      'endDate': monthEnd.toISODate,
+      'today': today().toISODate
     });
-    if (res==null)return;
+    /*
+    POPULATE CONST DATA: MENUS
+
+    setState(() {
+      menuList = constMenuList;
+      menuToday = constMenuToday;
+      loading = false;
+    });
+    */
+    if (res == null) return;
     setState(() {
       menuToday = Menu(res['menuToday']);
-      // res['menus'].forEach((m) {if (!menuList.any((i) => i.date == m['date'])) menuList.add(Menu(m['date'], List<String>.from(m['items'])));
+      /*
+      res['menus'].forEach((m) {if (!menuList.any((i) => i.date == m['date'])) menuList.add(Menu(m['date'], List<String>.from(m['items'])));
+      */
       menuList = List<Menu>.from(res['menus'].map((m) => Menu(m)));
-      loading=false;
+      loading = false;
     });
   }
 
@@ -71,10 +76,15 @@ class _AppState extends ConsumerState<App> {
 
   Future<void> fetchSkips() async {
     Map? res = await fetch('/skip', {'its': ref.read(authProvider)!.its});
+    /*
+    POPULATE CONST DATA: SKIPS
+
     setState(() {
-      skippedDates=constSkippedDates.map((String d) => DateFormat('yyyy-MM-dd').parse(d))
+      skippedDates = constSkippedDates
+          .map((String d) => DateFormat('yyyy-MM-dd').parse(d))
           .toList();
     });
+    */
     if (res == null) return;
     setState(() {
       skippedDates = List<String>.from(res['dates'])
@@ -92,27 +102,22 @@ class _AppState extends ConsumerState<App> {
 
   _onSkipTiffins() async {
     if (!await showConfirmationDialog(
-        
         'Skip tiffin for date:\n${datesSelected(startDate, endDate)} ?',
         'Confirm',
         'Cancel')) return;
     setState(() {
       endDate = endDate ?? startDate;
     });
-    if (startDate!.isBefore(tomorrow())
-        // || datesInBetween(startDate!, endDate!).any((date) => skippedDates.contains(date))
-
-        ) {
+    if (startDate!.isBefore(tomorrow())) {
       showSnackBar('Select dates from tomorrow onwards');
-    } else {
-      if ((await post('/skip', {
-            'its': ref.read(authProvider)!.its,
-            'startDate': startDate!.toISODate,
-            'endDate': endDate!.toISODate
-          })) !=
-          null) {
-        fetchSkips().then((_)=>showSnackBar('ITS ${ref.read(authProvider)!.its} skipped tiffin for date ${datesSelected(startDate, endDate)}'));
-      }
+    } else if ((await post('/skip', {
+          'its': ref.read(authProvider)!.its,
+          'startDate': startDate!.toISODate,
+          'endDate': endDate!.toISODate
+        })) !=
+        null) {
+      fetchSkips().then((_) => showSnackBar(
+          'ITS ${ref.read(authProvider)!.its} skipped tiffin for date ${datesSelected(startDate, endDate)}'));
     }
   }
 
@@ -120,14 +125,16 @@ class _AppState extends ConsumerState<App> {
     setState(() {
       endDate = endDate ?? startDate;
     });
-    ScaffoldMessenger.of(navkey.currentContext!).hideCurrentSnackBar();
-    if ((await delete('/skip', {
+    if (startDate!.isBefore(tomorrow()) ) {
+      showSnackBar('Select dates from tomorrow onwards');
+    } else if ((await delete('/skip', {
           'its': ref.read(authProvider)!.its,
           'startDate': startDate!.toISODate,
           'endDate': endDate!.toISODate
         })) !=
         null) {
-      fetchSkips().then((_)=>showSnackBar('ITS ${ref.read(authProvider)!.its} unskipped tiffin for date ${datesSelected(startDate, endDate)}'));
+      fetchSkips().then((_) => showSnackBar(
+          'ITS ${ref.read(authProvider)!.its} unskipped tiffin for date ${datesSelected(startDate, endDate)}'));
     }
   }
 
@@ -137,18 +144,21 @@ class _AppState extends ConsumerState<App> {
         .where((menu) =>
             dateInRange(menu.dateTime, startDate!, endDate ?? startDate!))
         .toList();
-    return 
-        RefreshIndicator(onRefresh: refresh,child:
-    Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.teal.shade900,
-          foregroundColor: Colors.white,
-          title: const Text('FMB Connect'),
-        ),
-        drawer: const Sidebar(),
-        body: SingleChildScrollView(
+    return RefreshIndicator(
+        onRefresh: refresh,
+        child: Scaffold(
+            appBar: AppBar(
+              backgroundColor: Colors.teal.shade900,
+              foregroundColor: Colors.white,
+              title: const Text('FMB Connect'),
+            ),
+            drawer: const Sidebar(),
+            body: 
+            SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
+                child:
+                
+                 Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   mainAxisSize: MainAxisSize.max,
                   children: [
@@ -166,7 +176,12 @@ class _AppState extends ConsumerState<App> {
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child:  MenuCard(menuToday, skippedDates.contains(today()), fetchMenu, loading: loading, ),
+                      child: MenuCard(
+                        menuToday,
+                        skippedDates.contains(today()),
+                        fetchMenu,
+                        loading: loading,
+                      ),
                     ),
                     const Divider(
                       thickness: 2,
@@ -246,17 +261,17 @@ class _AppState extends ConsumerState<App> {
                     Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: menusFiltered.isEmpty
-                            ?  MenuCard(null, true, fetchMenu)
+                            ? MenuCard(null, true, fetchMenu)
                             : ListView.separated(
                                 physics: const NeverScrollableScrollPhysics(),
                                 itemCount: menusFiltered.length,
                                 shrinkWrap: true,
                                 itemBuilder: (_, i) {
                                   final menu = menusFiltered[i];
-                                  return MenuCard(menu,
-                                      skippedDates.contains(menu.dateTime ),
-                                      fetchMenu
-                                      );
+                                  return MenuCard(
+                                      menu,
+                                      skippedDates.contains(menu.dateTime),
+                                      fetchMenu);
                                 },
                                 separatorBuilder: (_, i) => const SizedBox(
                                   height: 10,

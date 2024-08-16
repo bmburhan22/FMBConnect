@@ -1,6 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fmb_connect/constdata.dart';
 import 'package:fmb_connect/functions.dart';
 import 'package:fmb_connect/main.dart';
 
@@ -23,14 +24,13 @@ class AuthNotifier extends StateNotifier<User?> {
     final fcmtoken = await FirebaseMessaging.instance.getToken();
     print('FCM Token $fcmtoken');
     Map body = {'its': its, 'otp': otp, 'fcmtoken': fcmtoken};
-    Map? data = null;//await post('/verify_otp', body);
-    state = data?['auth'] ?? false
-
-    
+    Map? data = await post('/verify_otp', body);
+    state = (data?['auth'] ?? false)
         ? User(its, data?['name']??'')
-        :User(its, 'Burhanuddin M. Bhinderwala');
-        // : null;
-        
+        /*
+         : User(its, constUserName);
+        */
+        : null;
   }
 
   logout() {

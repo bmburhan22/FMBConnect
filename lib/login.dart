@@ -109,14 +109,15 @@ class _LoginState extends ConsumerState<Login> {
                     color: Colors.teal.shade100,
                     borderRadius: const BorderRadius.all(Radius.circular(8)),
                   ))),
-
-          // MaterialButton(
-          //     color: Colors.teal.shade900,
-          //     textColor: Colors.white,
-          //     child: Text('Log in'),
-          //     onPressed: () {
-          //       Auth.login(context, _itsController.text, _passwordController.text);
-          //     })
+/*
+          MaterialButton(
+              color: Colors.teal.shade900,
+              textColor: Colors.white,
+              child: Text('Log in'),
+              onPressed: () {
+                Auth.login(context, _itsController.text, _passwordController.text);
+              })
+              */
         ]
             .divide(const SizedBox(
               height: 20,

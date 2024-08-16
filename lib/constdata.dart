@@ -1,5 +1,5 @@
 import 'package:fmb_connect/menu_card.dart';
-
+final constUserName = 'Burhanuddin M. Bhinderwala';
 final List<Menu> constMenuList=[
     Menu({
       'date': '2024-08-05',
