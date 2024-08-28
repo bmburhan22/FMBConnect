@@ -48,6 +48,8 @@ dependencies:
   firebase_core: ^2.24.2
   intl: any
   skeletonizer:
+  url_launcher: ^6.3.0
+  
 flutter_launcher_icons:
   android: true
   image_path: "assets/images/logo.png"

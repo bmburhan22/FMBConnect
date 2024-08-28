@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fmb_connect/app.dart';
 import 'package:fmb_connect/auth.dart';
+import 'package:fmb_connect/contactus.dart';
 import 'package:fmb_connect/firebase_options.dart';
 import 'package:fmb_connect/functions.dart';
 import 'package:fmb_connect/login.dart';
@@ -55,6 +56,7 @@ class MyApp extends StatelessWidget {
                 'login': (_) => const Login(),
                 '/messages': (_) => const Messages(),
                 '/payment': (_) => const Payment(),
+                '/contactus': (_) => const Contactus(),
               },
             );
           });

@@ -68,6 +68,10 @@ class _SidebarState extends ConsumerState<Sidebar> {
                       icon: Icons.message,
                       text: 'Messages',
                       onTap: ()=> navkey.currentState?.pushNamed( '/messages'),
+                    ),TextIconButton(
+                      icon: Icons.email,
+                      text: 'Contact Us',
+                      onTap: ()=> navkey.currentState?.pushNamed( '/contactus'),
                     ),
                   ]
                       .divide(const SizedBox(
